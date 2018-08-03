@@ -3,24 +3,28 @@ BIN = lnvis
 PREFIX ?= /usr/local
 CFLAGS = -ggdb -Os -Wall -Werror -Wextra -std=c99
 
-LDFLAGS = -lSDL -lGL
+LDFLAGS = -lSDL2 -lGL
 
-DEPS = main.o
+
+SRCS = main.c
+SRCS += $(wildcard deps/*/*.c)
+
+OBJS = $(SRCS:.c=.o)
+
+all: $(BIN)
 
 include $(OBJS:.o=.d)
 
 %.d: %.c
 	$(CC) -MM $(CFLAGS) $< > $@
 
-all: $(BIN)
-
-$(BIN): main.o
-	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
+$(BIN): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 format: fake
 	clang-format -i *.c
 
 clean: fake
-	rm -f $(DEPS)
+	rm -f $(OBJS) *.d
 
 .PHONY: fake
