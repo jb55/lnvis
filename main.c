@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include "gl.h"
+
+#include <stdio.h>
 #ifdef NANOVG_GLEW
 #include <GL/glew.h>
 #endif
@@ -8,16 +9,18 @@
 #include "nanovg/nanovg.h"
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg/nanovg_gl.h"
-#include "demo.h"
+
+#include "defs.h"
 #include "perf.h"
+#include "demo.h"
+#include "render.h"
+#include "ln.h"
 
 void errorcb(int error, const char *desc)
 {
 	printf("GLFW error %d: %s\n", error, desc);
 }
 
-int blowup = 0;
-int screenshot = 0;
 int premult = 0;
 
 static void key(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -26,10 +29,8 @@ static void key(GLFWwindow *window, int key, int scancode, int action, int mods)
 	NVG_NOTUSED(mods);
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-		blowup = !blowup;
-	if (key == GLFW_KEY_S && action == GLFW_PRESS)
-		screenshot = 1;
+	/* if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) */
+	/* 	blowup = !blowup; */
 	if (key == GLFW_KEY_P && action == GLFW_PRESS)
 		premult = !premult;
 }
@@ -41,6 +42,15 @@ int main()
 	NVGcontext *vg = NULL;
 	PerfGraph fps;
 	double prevt = 0;
+	struct ln ln;
+
+	struct node test_nodes[] = { {
+		.alias = "@jb55",
+		.color = { { 255, 0, 0, 0 } },
+	} };
+
+	ln.nodes = test_nodes;
+	ln.node_count = ARRAY_SIZE(test_nodes);
 
 	if (!glfwInit()) {
 		printf("Failed to init GLFW.");
@@ -84,10 +94,12 @@ int main()
 		return -1;
 	}
 
+	ln.vg = vg;
+
 	if (loadDemoData(vg, &data) == -1)
 		return -1;
 
-	glfwSwapInterval(0);
+	glfwSwapInterval(1);
 
 	glfwSetTime(0);
 	prevt = glfwGetTime();
@@ -121,7 +133,8 @@ int main()
 
 		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
 
-		renderDemo(vg, mx, my, winWidth, winHeight, t, blowup, &data);
+		/* renderDemo(vg, mx, my, winWidth, winHeight, t, 1, &data); */
+		render_ln(&ln);
 		renderGraph(vg, 5, 5, &fps);
 
 		nvgEndFrame(vg);

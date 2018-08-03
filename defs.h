@@ -2,6 +2,8 @@
 #ifndef LNVIS_DEFS_H
 #define LNVIS_DEFS_H
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 typedef unsigned char u8;
 typedef signed char s8;
 

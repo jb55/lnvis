@@ -8,8 +8,10 @@ LDFLAGS = -lglfw -lGL
 
 
 SRCS = main.c
-SRCS += demo.c
+
+SRCS += render.c
 SRCS += perf.c
+SRCS += demo.c
 SRCS += $(wildcard deps/*/*.c)
 
 OBJS = $(SRCS:.c=.o)
@@ -23,6 +25,9 @@ include $(OBJS:.o=.d)
 
 $(BIN): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+
+TAGS: fake
+	etags $(SRCS)
 
 format: fake
 	clang-format -i *.c
