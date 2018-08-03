@@ -25,7 +25,13 @@
 #define FONTSTASH_IMPLEMENTATION
 #include "fontstash.h"
 #define STB_IMAGE_IMPLEMENTATION
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #include "stb_image.h"
+#pragma GCC diagnostic pop
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4100)  // unreferenced formal parameter
