@@ -1,12 +1,15 @@
 
 BIN = lnvis
 PREFIX ?= /usr/local
-CFLAGS = -ggdb -Os -Wall -Werror -Wextra -std=c99
+CFLAGS = -Ideps -ggdb -Os -Wall -Werror -Wextra -std=c99 \
+         -Wno-implicit-fallthrough
 
-LDFLAGS = -lSDL2 -lGL
+LDFLAGS = -lglfw -lGL
 
 
 SRCS = main.c
+SRCS += demo.c
+SRCS += perf.c
 SRCS += $(wildcard deps/*/*.c)
 
 OBJS = $(SRCS:.c=.o)
