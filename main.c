@@ -46,7 +46,7 @@ int main()
 
 	struct node test_nodes[] = { {
 		.alias = "@jb55",
-		.color = { { 255, 0, 0, 0 } },
+		.color = { { 1.0, 0, 0, 1.0 } },
 	} };
 
 	ln.nodes = test_nodes;
@@ -126,8 +126,8 @@ int main()
 		glViewport(0, 0, fbWidth, fbHeight);
 		if (premult)
 			glClearColor(0, 0, 0, 0);
-		else
-			glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+		else // base16-onedark bg color ;)
+			glClearColor(0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
 
