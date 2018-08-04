@@ -26,6 +26,7 @@ struct node *hit_node(struct ln *ln) {
 void update(struct ln *ln, double dt)
 {
 
+
 	// click detection
 	if (ln->clicked) {
 		struct node *hit = hit_node(ln);
