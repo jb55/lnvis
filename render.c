@@ -3,10 +3,48 @@
 #include <stdio.h>
 #include "nanovg/nanovg.h"
 
+void draw_channel(NVGcontext *vg, struct channel *channel)
+{
+	const struct node *n1 = channel->nodes[0];
+	const struct node *n2 = channel->nodes[1];
+	static const float stroke = 2.0f;
+
+	const float sx = n1->x;
+	const float sy = n1->y;
+
+	const float ex = n2->x;
+	const float ey = n2->y;
+
+	NVGcolor n1_color =
+		nvgRGBAf(n1->color.r,
+			 n1->color.g,
+			 n1->color.b,
+			 n1->color.a);
+
+	NVGcolor n2_color =
+		nvgRGBAf(n2->color.r,
+			 n2->color.g,
+			 n2->color.b,
+			 n2->color.a);
+
+	NVGpaint linear_grad =
+		nvgLinearGradient(vg, sx, sy, ex, ey, n1_color, n2_color);
+
+	nvgSave(vg);
+	nvgStrokeWidth(vg, stroke);
+
+	nvgStrokePaint(vg, linear_grad);
+	nvgBeginPath(vg);
+	nvgMoveTo(vg, n1->x, n1->y);
+	nvgLineTo(vg, n2->x, n2->y);
+	nvgStroke(vg);
+	nvgRestore(vg);
+}
+
 void draw_node(NVGcontext *vg, struct node *node)
 {
-	const float r = 20.0;
-	const float pos = 500.0;
+	const float r = node->size;
+	/* const float pos = 500.0; */
 
 	/* const float h = r; */
 	/* const float w = r; */
@@ -14,12 +52,7 @@ void draw_node(NVGcontext *vg, struct node *node)
 	/* const float y = pos; */
 	/* const float kr = (int)(h * 0.35f); */
 	/* const float cy = y + (int)(h * 0.5f); */
-
-
 	NVGpaint bg;
-
-	nvgSave(vg);
-	nvgTranslate(vg, pos, pos);
 
 	NVGcolor node_color =
 		nvgRGBAf(node->color.r, node->color.g, node->color.b,
@@ -27,6 +60,9 @@ void draw_node(NVGcontext *vg, struct node *node)
 
 	NVGcolor blend =
 		nvgRGBAf(0, 0, 0, 0.5);
+
+	nvgSave(vg);
+	nvgTranslate(vg, node->x, node->y);
 
 	const float light = 2.0f;
 	bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, node_color, blend);
@@ -54,6 +90,13 @@ void draw_node(NVGcontext *vg, struct node *node)
 
 void render_ln(struct ln *ln)
 {
-	for (int i = 0; i < ln->node_count; i++)
-		draw_node(ln->vg, &ln->nodes[i]);
+	u32 i;
+	NVGcontext *vg = ln->vg;
+
+	// render channels first
+	for (i = 0; i < ln->channel_count; i++)
+		draw_channel(vg, &ln->channels[i]);
+
+	for (i = 0; i < ln->node_count; i++)
+		draw_node(vg, &ln->nodes[i]);
 }

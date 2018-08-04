@@ -9,6 +9,7 @@ LDFLAGS = -lglfw -lGL
 
 SRCS = main.c
 
+SRCS += update.c
 SRCS += render.c
 SRCS += perf.c
 SRCS += demo.c

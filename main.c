@@ -14,6 +14,7 @@
 #include "perf.h"
 #include "demo.h"
 #include "render.h"
+#include "update.h"
 #include "ln.h"
 
 void errorcb(int error, const char *desc)
@@ -35,6 +36,36 @@ static void key(GLFWwindow *window, int key, int scancode, int action, int mods)
 		premult = !premult;
 }
 
+
+static double rand_0to1() {
+	return (double) rand() / RAND_MAX;
+}
+
+static double mx, my;
+static int mdown = 0;
+static int mclicked = 0;
+
+void mouse_pos(GLFWwindow *win, double x, double y)
+{
+	(void)win;
+	mx = x;
+	my = y;
+}
+
+void mouse_click(GLFWwindow *win, int button, int action, int mods)
+{
+	(void)win;
+	(void)button;
+	(void)action;
+	(void)mods;
+
+	mclicked = action == 1 && button == 0;
+
+	if (button == 0)
+		mdown = action;
+}
+
+
 int main()
 {
 	GLFWwindow *window;
@@ -44,13 +75,44 @@ int main()
 	double prevt = 0;
 	struct ln ln;
 
-	struct node test_nodes[] = { {
-		.alias = "@jb55",
-		.color = { { 1.0, 0, 0, 1.0 } },
-	} };
+	struct node test_nodes[] = {
+		{
+			.alias = "@jb55",
+			.color = { { 1.0, 0, 0, 1.0 } },
+		},
+		{
+			.alias = "SuperHub",
+			.color = { { 0.0, 1.0, 0.0, 1.0 } },
+		},
+		{
+			.alias = "satoshis.place",
+			.color = { { 0.0, 0.5, 1.0, 1.0 } },
+		},
+	};
+
+	struct channel test_channels[] = {
+		{
+			.nodes = { &test_nodes[0], &test_nodes[1] },
+		},
+		{
+			.nodes = { &test_nodes[1], &test_nodes[2] },
+		}
+	};
 
 	ln.nodes = test_nodes;
 	ln.node_count = ARRAY_SIZE(test_nodes);
+
+	ln.channels = test_channels;
+	ln.channel_count = ARRAY_SIZE(test_channels);
+
+	for (u32 i = 0; i < ln.node_count; ++i) {
+		struct node *n = &ln.nodes[i];
+		n->x = 100.0 * (i+1);
+		n->y = 100.0 * (i+1);
+		n->vx = 200.0 * rand_0to1();
+		n->vy = 200.0 * rand_0to1();
+		n->size = 20;
+	}
 
 	if (!glfwInit()) {
 		printf("Failed to init GLFW.");
@@ -95,6 +157,7 @@ int main()
 	}
 
 	ln.vg = vg;
+	ln.clicked = 0;
 
 	if (loadDemoData(vg, &data) == -1)
 		return -1;
@@ -104,8 +167,13 @@ int main()
 	glfwSetTime(0);
 	prevt = glfwGetTime();
 
+	glfwSetMouseButtonCallback(window, mouse_click);
+	glfwSetCursorPosCallback(window, mouse_pos);
+
 	while (!glfwWindowShouldClose(window)) {
-		double mx, my, t, dt;
+		if (ln.clicked)
+			ln.clicked = 0;
+		double t, dt;
 		int winWidth, winHeight;
 		int fbWidth, fbHeight;
 		float pxRatio;
@@ -114,6 +182,13 @@ int main()
 		dt = t - prevt;
 		prevt = t;
 		updateGraph(&fps, dt);
+
+		ln.clicked = mclicked;
+		mclicked = 0;
+
+		ln.mx = mx;
+		ln.my = my;
+		ln.mdown = mdown;
 
 		glfwGetCursorPos(window, &mx, &my);
 		glfwGetWindowSize(window, &winWidth, &winHeight);
@@ -127,13 +202,15 @@ int main()
 		if (premult)
 			glClearColor(0, 0, 0, 0);
 		else // base16-onedark bg color ;)
-			glClearColor(0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f);
+			glClearColor(0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0,
+				     1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
 
 		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
 
 		/* renderDemo(vg, mx, my, winWidth, winHeight, t, 1, &data); */
+		update(&ln, dt);
 		render_ln(&ln);
 		renderGraph(vg, 5, 5, &fps);
 
