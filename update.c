@@ -25,7 +25,8 @@ struct node *hit_node(struct ln *ln) {
 // force graph update logic
 void update(struct ln *ln, double dt)
 {
-
+	u32 i;
+	static const double friction = 0.97;
 
 	// click detection
 	if (ln->clicked) {
@@ -45,9 +46,7 @@ void update(struct ln *ln, double dt)
 		ln->drag_target->vy = 0;
 	}
 
-	u32 i;
-	static const double friction = 0.3;
-
+	// channel constraints
 	for (i = 0; i < ln->channel_count; ++i) {
 		struct channel *channel = &ln->channels[i];
 
@@ -57,25 +56,32 @@ void update(struct ln *ln, double dt)
 		double dx = n2->x - n1->x;
 		double dy = n2->y - n1->y;
 
-		n1->vx += dx * 0.001;
-		n1->vy += dy * 0.001;
+		/* double d = sqrt(dx*dx + dy*dy); */
+
+		const double scale = 0.01;
+
+		n1->vx += dx * scale;
+		n1->vy += dy * scale;
+
+		n2->vx += -dx * scale;
+		n2->vy += -dy * scale;
+
 	}
 
 	for (u32 i = 0; i < ln->node_count; i++) {
 		struct node *node = &ln->nodes[i];
 
 		// semi-implicit euler
+		node->ax *= friction;
+		node->ay *= friction;
 
 		// update node position
 		node->vx += node->ax * dt;
 		node->vy += node->ay * dt;
 
 		// forces (testing)
-		if (node->vx > 0.0)
-			node->vx -= friction;
-
-		if (node->vy > 0.0)
-			node->vy -= friction;
+		node->vx *= friction;
+		node->vy *= friction;
 
 		node->x += node->vx * dt;
 		node->y += node->vy * dt;
