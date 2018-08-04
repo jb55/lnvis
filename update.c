@@ -29,10 +29,6 @@ void update(struct ln *ln, double dt)
 	// click detection
 	if (ln->clicked) {
 		struct node *hit = hit_node(ln);
-
-		if (hit != NULL)
-			printf("hit %s\n", hit->alias);
-
 		ln->drag_target = hit;
 	}
 
@@ -44,6 +40,8 @@ void update(struct ln *ln, double dt)
 	if (ln->mdown && ln->drag_target) {
 		ln->drag_target->x = ln->mx;
 		ln->drag_target->y = ln->my;
+		ln->drag_target->vx = 0;
+		ln->drag_target->vy = 0;
 	}
 
 	u32 i;
