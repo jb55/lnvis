@@ -26,7 +26,8 @@ struct node *hit_node(struct ln *ln) {
 void update(struct ln *ln, double dt)
 {
 	u32 i;
-	static const double friction = 0.97;
+	static const double friction_coeff = 0.03;
+	static const double friction = 1.0 - friction_coeff;
 
 	// click detection
 	if (ln->clicked) {
@@ -58,7 +59,7 @@ void update(struct ln *ln, double dt)
 
 		/* double d = sqrt(dx*dx + dy*dy); */
 
-		const double scale = 0.01;
+		const double scale = 0.001;
 
 		n1->vx += dx * scale;
 		n1->vy += dy * scale;
