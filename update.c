@@ -58,16 +58,34 @@ void update(struct ln *ln, double dt)
 		double dx = n2->x - n1->x;
 		double dy = n2->y - n1->y;
 
-		/* double d = sqrt(dx*dx + dy*dy); */
+		double d = sqrt(dx*dx + dy*dy);
 
-		const double scale = 0.001;
+		static const double mindist = 100.0;
+		if (d < mindist) {
+			double nx = dx / d;
+			double ny = dy / d;
 
-		n1->vx += dx * scale;
-		n1->vy += dy * scale;
+			double nnx = (d - mindist) * nx;
+			double nny = (d - mindist) * ny;
 
-		n2->vx += -dx * scale;
-		n2->vy += -dy * scale;
+			double mx = nnx;
+			double my = nny;
 
+			n1->vx += mx;
+			n1->vy += my;
+
+			n2->vx -= mx;
+			n2->vy -= my;
+		}
+		else {
+			const double scale = 0.01;
+
+			n1->vx += dx * scale;
+			n1->vy += dy * scale;
+
+			n2->vx += -dx * scale;
+			n2->vy += -dy * scale;
+		}
 	}
 
 	for (u32 i = 0; i < ln->node_count; i++) {
