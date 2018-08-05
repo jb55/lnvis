@@ -68,8 +68,11 @@ void update(struct ln *ln, double dt)
 			double nnx = (d - mindist) * nx;
 			double nny = (d - mindist) * ny;
 
-			double mx = nnx;
-			double my = nny;
+			if (isnan(nnx) || isnan(nny))
+				continue;
+
+			double mx = nnx * dt;
+			double my = nny * dt;
 
 			n1->vx += mx;
 			n1->vy += my;
@@ -78,13 +81,13 @@ void update(struct ln *ln, double dt)
 			n2->vy -= my;
 		}
 		else {
-			const double scale = 0.01;
+			const double scale = 1.0;
 
-			n1->vx += dx * scale;
-			n1->vy += dy * scale;
+			n1->vx += dx * scale * dt;
+			n1->vy += dy * scale * dt;
 
-			n2->vx += -dx * scale;
-			n2->vy += -dy * scale;
+			n2->vx += -dx * scale * dt;
+			n2->vy += -dy * scale * dt;
 		}
 	}
 

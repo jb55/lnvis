@@ -79,6 +79,8 @@ void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *
 	ln->node_count = num_nodes;
 	ln->channels = malloc(sizeof(*ln->channels) * num_nodes * max_per_node);
 
+	printf("max channels %d\n", num_nodes * max_per_node);
+
 	for (i = 0; i < num_nodes; ++i) {
 		n = &ln->nodes[i];
 
@@ -99,10 +101,10 @@ void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *
 	// connect nodes randomly
 	for (i = 0; i < num_nodes; ++i) {
 
+		from = i;
 	skip:
 		// for each node, it can have 0 to max_per_node connections
 		for (j = 0; j < rand() % max_per_node; ++j) {
-			from = i;
 			do {
 				tries++;
 				if (tries > 5) {
@@ -243,7 +245,8 @@ int main()
 
 
 		if (first) {
-			random_network(winWidth, winHeight, 3, 100, &ln);
+			random_network(winWidth, winHeight, 3, 50, &ln);
+			printf("channels %d\n", ln.channel_count);
 			first = 0;
 		}
 
