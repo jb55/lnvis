@@ -1,6 +1,7 @@
 
 #include "ln.h"
 #include <math.h>
+#include <assert.h>
 #include <stdio.h>
 
 struct node *hit_node(struct ln *ln) {
@@ -86,6 +87,6 @@ void update(struct ln *ln, double dt)
 
 		node->x += node->vx * dt;
 		node->y += node->vy * dt;
-
 	}
+
 }
