@@ -5,6 +5,8 @@
 #include "nanovg/nanovg.h"
 #include "defs.h"
 
+#define CELL_MAX_ELEMS 32
+
 struct node {
 	const char *alias;
 	const char *id; // pubkey
@@ -16,6 +18,7 @@ struct node {
 		};
 	} color;
 
+	int grid_x, grid_y;
 	double x, y;
 	double vx, vy;
 	double ax, ay;
@@ -71,12 +74,22 @@ struct channel {
 	u32 last_update;
 };
 
+struct cell {
+	struct node *nodes[CELL_MAX_ELEMS];
+	int node_count;
+};
+
 struct ln {
 	NVGcontext *vg;
 
 	int clicked;
 	int mdown;
 	double mx, my;
+	int window_width;
+	int window_height;
+
+	int grid_div;
+	struct cell *grid;
 
 	struct node *drag_target;
 
@@ -86,5 +99,9 @@ struct ln {
 	struct channel *channels;
 	u32 channel_count;
 };
+
+void init_ln(struct ln *ln, int grid_div);
+void free_ln(struct ln *ln);
+void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *ln);
 
 #endif /* LNVIS_LN_H */

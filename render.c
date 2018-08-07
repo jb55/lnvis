@@ -59,7 +59,7 @@ void draw_node(NVGcontext *vg, struct node *node)
 			 node->color.a);
 
 	NVGcolor blend =
-		nvgRGBAf(0, 0, 0, 0.5);
+		nvgRGBAf(0, 0, 0, 1.0);
 
 	nvgSave(vg);
 	nvgTranslate(vg, node->x, node->y);

@@ -1,5 +1,6 @@
 
 #include "ln.h"
+#include "grid.h"
 #include <math.h>
 #include <assert.h>
 #include <stdio.h>
@@ -23,30 +24,9 @@ struct node *hit_node(struct ln *ln) {
 	return NULL;
 }
 
-// force graph update logic
-void update(struct ln *ln, double dt)
-{
+
+void force_graph(struct ln *ln, double dt) {
 	u32 i;
-	static const double friction_coeff = 0.03;
-	static const double friction = 1.0 - friction_coeff;
-
-	// click detection
-	if (ln->clicked) {
-		struct node *hit = hit_node(ln);
-		ln->drag_target = hit;
-	}
-
-	// stop dragging
-	if (!ln->mdown && ln->drag_target)
-		ln->drag_target = NULL;
-
-	// drag
-	if (ln->mdown && ln->drag_target) {
-		ln->drag_target->x = ln->mx;
-		ln->drag_target->y = ln->my;
-		ln->drag_target->vx = 0;
-		ln->drag_target->vy = 0;
-	}
 
 	// channel constraints
 	for (i = 0; i < ln->channel_count; ++i) {
@@ -62,21 +42,29 @@ void update(struct ln *ln, double dt)
 
 		static const double mindist = 100.0;
 		if (d < mindist) {
+
+			// normalized vector between two nodes
 			double nx = dx / d;
 			double ny = dy / d;
 
+			// get the distance past the minimum distance along
+			// the vector between the two nodes
 			double nnx = (d - mindist) * nx;
 			double nny = (d - mindist) * ny;
 
 			if (isnan(nnx) || isnan(nny))
 				continue;
 
+			// normalize by frame time
 			double mx = nnx * dt;
 			double my = nny * dt;
 
+			// correct for the distance by accelerating the node away
+			// from the other node
 			n1->vx += mx;
 			n1->vy += my;
 
+			// do the same in the opposite direction for the other node
 			n2->vx -= mx;
 			n2->vy -= my;
 		}
@@ -90,7 +78,14 @@ void update(struct ln *ln, double dt)
 			n2->vy += -dy * scale * dt;
 		}
 	}
+}
 
+
+void physics(struct ln *ln, double dt) {
+	static const double friction_coeff = 0.03;
+	static const double friction = 1.0 - friction_coeff;
+
+	// physics
 	for (u32 i = 0; i < ln->node_count; i++) {
 		struct node *node = &ln->nodes[i];
 
@@ -109,5 +104,34 @@ void update(struct ln *ln, double dt)
 		node->x += node->vx * dt;
 		node->y += node->vy * dt;
 	}
+}
 
+
+
+// force graph update logic
+void update(struct ln *ln, double dt)
+{
+	// click detection
+	if (ln->clicked) {
+		struct node *hit = hit_node(ln);
+		ln->drag_target = hit;
+	}
+
+	// stop dragging
+	if (!ln->mdown && ln->drag_target)
+		ln->drag_target = NULL;
+
+	// drag
+	if (ln->mdown && ln->drag_target) {
+		ln->drag_target->x = ln->mx;
+		ln->drag_target->y = ln->my;
+		ln->drag_target->vx = 0;
+		ln->drag_target->vy = 0;
+	}
+
+	force_graph(ln, dt);
+
+	physics(ln, dt);
+
+	update_grid_move_nodes(ln);
 }
