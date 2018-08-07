@@ -41,6 +41,31 @@ void draw_channel(NVGcontext *vg, struct channel *channel)
 	nvgRestore(vg);
 }
 
+
+void draw_grid(NVGcontext *vg, int ww, int wh, int grid_div) {
+
+	for (int x = 0; x < grid_div; ++x)  {
+		double px = ww / grid_div * x;
+			//int py = wh / grid_div * y;
+
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, px, 0);
+		nvgLineTo(vg, px, wh);
+		nvgStroke(vg);
+	}
+
+	for (int y = 0; y < grid_div; ++y)  {
+		double py = wh / grid_div * y;
+		//int py = wh / grid_div * y;
+
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, 0, py);
+		nvgLineTo(vg, ww, py);
+		nvgStroke(vg);
+	}
+}
+
+
 void draw_node(NVGcontext *vg, struct node *node)
 {
 	const float r = node->size;
@@ -92,6 +117,8 @@ void render_ln(struct ln *ln)
 {
 	u32 i;
 	NVGcontext *vg = ln->vg;
+
+	draw_grid(vg, ln->window_width, ln->window_height, ln->grid_div);
 
 	// render channels first
 	for (i = 0; i < ln->channel_count; i++)

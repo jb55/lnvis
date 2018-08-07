@@ -1,6 +1,7 @@
 #include "gl.h"
 
 #include <stdio.h>
+#include <time.h>
 #ifdef NANOVG_GLEW
 #include <GL/glew.h>
 #endif
@@ -71,6 +72,7 @@ int main()
 	PerfGraph fps;
 	double prevt = 0;
 
+	srand(time(0));
 	// ln collision grid subdivision
 	// cells = grid_div * grid_div
 	int grid_div = 20;
@@ -160,7 +162,7 @@ int main()
 		ln.window_width = winWidth;
 
 		if (first) {
-			random_network(winWidth, winHeight, 3, 50, &ln);
+			random_network(winWidth, winHeight, 3, 200, &ln);
 			printf("channels %d\n", ln.channel_count);
 			first = 0;
 		}

@@ -18,7 +18,7 @@ struct node {
 		};
 	} color;
 
-	int grid_x, grid_y;
+	struct cell *cell;
 	double x, y;
 	double vx, vy;
 	double ax, ay;
@@ -72,11 +72,6 @@ struct channel {
 	u64 msatoshi_to_us_max;
 
 	u32 last_update;
-};
-
-struct cell {
-	struct node *nodes[CELL_MAX_ELEMS];
-	int node_count;
 };
 
 struct ln {
