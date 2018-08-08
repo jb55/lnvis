@@ -12,6 +12,7 @@ union color {
 	struct {
 		float r, g, b, a;
 	};
+	NVGcolor nvg_color;
 };
 
 struct node {

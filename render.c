@@ -16,20 +16,10 @@ void draw_channel(NVGcontext *vg, struct channel *channel)
 	const float ex = n2->x;
 	const float ey = n2->y;
 
-	NVGcolor n1_color =
-		nvgRGBAf(n1->color.r,
-			 n1->color.g,
-			 n1->color.b,
-			 n1->color.a);
-
-	NVGcolor n2_color =
-		nvgRGBAf(n2->color.r,
-			 n2->color.g,
-			 n2->color.b,
-			 n2->color.a);
-
 	NVGpaint linear_grad =
-		nvgLinearGradient(vg, sx, sy, ex, ey, n1_color, n2_color);
+		nvgLinearGradient(vg, sx, sy, ex, ey,
+				  n1->color.nvg_color,
+				  n2->color.nvg_color);
 
 	nvgSave(vg);
 	nvgStrokeWidth(vg, stroke);
@@ -52,6 +42,7 @@ void draw_grid(NVGcontext *vg, int ww, int wh, int grid_div) {
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, px, 0);
 		nvgLineTo(vg, px, wh);
+		/* nvgStrokeColor(vg, ) */
 		nvgStroke(vg);
 	}
 
@@ -86,12 +77,6 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 
 	static const float adj = 0.3f;
 
-	NVGcolor clear =
-		nvgRGBAf(ln->clear_color.r,
-			 ln->clear_color.g,
-			 ln->clear_color.b,
-			 1.0f);
-
 	NVGcolor clear_adj =
 		nvgRGBAf(ln->clear_color.r * adj,
 			 ln->clear_color.g * adj,
@@ -111,7 +96,9 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 
 	// TODO: use brightness instead of clear color for white theme
 	if (!ln->dark_theme)
-		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, clear, node_color);
+		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0,
+				       ln->clear_color.nvg_color,
+				       node_color);
 	else
 		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, node_color, blend);
 
@@ -120,7 +107,7 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	/* nvgPathWinding(vg, NVG_HOLE); */
 
 	nvgStrokeWidth(vg, 3.0f);
-	nvgStrokeColor(vg, ln->dark_theme ? clear_adj : clear);
+	nvgStrokeColor(vg, ln->dark_theme ? clear_adj : ln->clear_color.nvg_color);
 	nvgStroke(vg);
 
 	nvgFillPaint(vg, bg);
