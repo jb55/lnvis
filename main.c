@@ -37,9 +37,19 @@ static void key(GLFWwindow *window, int key, int scancode, int action, int mods)
 		premult = !premult;
 }
 
+static struct ln ln;
 static double mx, my;
 static int mdown = 0;
 static int mclicked = 0;
+
+static const union color dark_color = {
+	.rgba = { 0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f }
+};
+
+static const union color light_color = {
+	.rgba = { 1.0, 1.0, 1.0, 1.0f }
+};
+
 
 void mouse_pos(GLFWwindow *win, double x, double y)
 {
@@ -62,6 +72,33 @@ void mouse_click(GLFWwindow *win, int button, int action, int mods)
 }
 
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	(void)mods;
+	(void)scancode;
+	(void)window;
+
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_A:
+			ln.display_flags ^= DISP_ALIASES;
+			break;
+		case GLFW_KEY_S:
+			ln.display_flags ^= DISP_STROKE_NODES;
+			break;
+		case GLFW_KEY_G:
+			ln.display_flags ^= DISP_GRID;
+			break;
+		case GLFW_KEY_T:
+			if (ln.display_flags & DISP_DARK)
+				memcpy(&ln.clear_color, &light_color, sizeof(ln.clear_color));
+			else
+				memcpy(&ln.clear_color, &dark_color, sizeof(ln.clear_color));
+			ln.display_flags ^= DISP_DARK;
+			break;
+		}
+	}
+}
 
 int main()
 {
@@ -78,18 +115,13 @@ int main()
 	static const int grid_div = 20;
 	static const int dark_theme = 1;
 
-	static const union color dark_color = {
-		.rgba = { 0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f }
-	};
+	u64 flags = DISP_DARK
+		  /* | DISP_ALIASES */
+		  | DISP_GRID
+		  /* | DISP_STROKE_NODES */
+		  ;
 
-	static const union color light_color = {
-		.rgba = { 1.0, 1.0, 1.0, 1.0f }
-	};
-
-	// clear color
-	struct ln ln = {
-		.dark_theme = dark_theme
-	};
+	ln.display_flags = flags;
 
 	if (dark_theme)
 		memcpy(&ln.clear_color, &dark_color, sizeof(ln.clear_color));
@@ -149,7 +181,7 @@ int main()
 	glfwSetTime(0);
 	prevt = glfwGetTime();
 
-
+	glfwSetKeyCallback(window, key_callback);
 	glfwSetMouseButtonCallback(window, mouse_click);
 	glfwSetCursorPosCallback(window, mouse_pos);
 
@@ -180,7 +212,7 @@ int main()
 		ln.window_width = winWidth;
 
 		if (first) {
-			random_network(winWidth, winHeight, 3, 200, &ln);
+			random_network(winWidth, winHeight, 3, 500, &ln);
 			printf("channels %d\n", ln.channel_count);
 			first = 0;
 		}

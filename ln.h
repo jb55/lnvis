@@ -77,6 +77,13 @@ struct channel {
 	u32 last_update;
 };
 
+enum display_flags {
+	DISP_DARK         = 1UL << 0,
+	DISP_GRID         = 1UL << 1,
+	DISP_ALIASES      = 1UL << 2,
+	DISP_STROKE_NODES = 1UL << 3,
+};
+
 struct ln {
 	NVGcontext *vg;
 
@@ -87,7 +94,7 @@ struct ln {
 	int window_height;
 
 	union color clear_color;
-	int dark_theme;
+	u64 display_flags;
 
 	int grid_div;
 	struct cell *grid;

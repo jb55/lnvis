@@ -48,7 +48,7 @@ void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *
 		n->ay = 0.0;
 		n->vx = 0.0;
 		n->vy = 0.0;
-		n->size = 10;
+		n->size = 8;
 	}
 
 	// connect nodes randomly

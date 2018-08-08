@@ -33,7 +33,17 @@ void draw_channel(NVGcontext *vg, struct channel *channel)
 }
 
 
-void draw_grid(NVGcontext *vg, int ww, int wh, int grid_div) {
+void draw_grid(NVGcontext *vg, struct ln *ln) {
+	static const float adj = 0.6f;
+	const int grid_div = ln->grid_div;
+	const int ww = ln->window_width;
+	const int wh = ln->window_height;
+
+	NVGcolor clear_adj =
+		nvgRGBAf(ln->clear_color.r * adj,
+			 ln->clear_color.g * adj,
+			 ln->clear_color.b * adj,
+			 1.0f);
 
 	for (int x = 0; x < grid_div; ++x)  {
 		double px = ww / grid_div * x;
@@ -42,7 +52,7 @@ void draw_grid(NVGcontext *vg, int ww, int wh, int grid_div) {
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, px, 0);
 		nvgLineTo(vg, px, wh);
-		/* nvgStrokeColor(vg, ) */
+		nvgStrokeColor(vg, clear_adj);
 		nvgStroke(vg);
 	}
 
@@ -93,9 +103,10 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	nvgTranslate(vg, node->x, node->y);
 
 	const float light = 2.0f;
+	const int dark_theme = ln->display_flags & DISP_DARK;
 
 	// TODO: use brightness instead of clear color for white theme
-	if (!ln->dark_theme)
+	if (!dark_theme)
 		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0,
 				       ln->clear_color.nvg_color,
 				       node_color);
@@ -106,20 +117,23 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	nvgCircle(vg, 0, 0, r);
 	/* nvgPathWinding(vg, NVG_HOLE); */
 
-	nvgStrokeWidth(vg, 3.0f);
-	nvgStrokeColor(vg, ln->dark_theme ? clear_adj : ln->clear_color.nvg_color);
-	nvgStroke(vg);
+	if (ln->display_flags & DISP_STROKE_NODES) {
+		nvgStrokeWidth(vg, 3.0f);
+		nvgStrokeColor(vg, dark_theme ? clear_adj : ln->clear_color.nvg_color);
+		nvgStroke(vg);
+	}
 
 	nvgFillPaint(vg, bg);
 	nvgFill(vg);
 
-
-	nvgFontSize(vg, 18.0f);
-	nvgFontFace(vg, "sans");
-	nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-	/* nvgTextMetrics(vg, NULL, NULL, &lineh); */
-	nvgFillColor(vg, node_color);
-	nvgText(vg, -r, r, node->alias, NULL);
+	if (ln->display_flags & DISP_ALIASES) {
+		nvgFontSize(vg, 18.0f);
+		nvgFontFace(vg, "sans");
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		/* nvgTextMetrics(vg, NULL, NULL, &lineh); */
+		nvgFillColor(vg, node_color);
+		nvgText(vg, -r, r, node->alias, NULL);
+	}
 
 	nvgRestore(vg);
 }
@@ -129,7 +143,7 @@ void render_ln(struct ln *ln)
 	u32 i;
 	NVGcontext *vg = ln->vg;
 
-	draw_grid(vg, ln->window_width, ln->window_height, ln->grid_div);
+	draw_grid(vg, ln);
 
 	// render channels first
 	for (i = 0; i < ln->channel_count; i++)
