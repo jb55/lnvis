@@ -14,7 +14,9 @@ SRCS += ln.c
 SRCS += grid.c
 SRCS += render.c
 SRCS += perf.c
+SRCS += json.c
 SRCS += demo.c
+SRCS += $(wildcard deps/*.c)
 SRCS += $(wildcard deps/*/*.c)
 
 OBJS = $(SRCS:.c=.o)

@@ -17,6 +17,7 @@
 #include "render.h"
 #include "update.h"
 #include "ln.h"
+#include "json.h"
 
 void errorcb(int error, const char *desc)
 {
@@ -100,6 +101,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
+void test_read_json()
+{
+	FILE *f = fopen("clightning-channels.json", "r");
+	int res = parse_clightning_channels(f);
+	printf("test_read_json res %d\n", res);
+	fclose(f);
+	exit(0);
+}
+
 int main()
 {
 	GLFWwindow *window;
@@ -120,6 +130,8 @@ int main()
 		  | DISP_GRID
 		  /* | DISP_STROKE_NODES */
 		  ;
+
+	test_read_json();
 
 	ln.display_flags = flags;
 
