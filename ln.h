@@ -7,16 +7,18 @@
 
 #define CELL_MAX_ELEMS 32
 
+union color {
+	float rgba[4];
+	struct {
+		float r, g, b, a;
+	};
+};
+
 struct node {
 	const char *alias;
 	const char *id; // pubkey
 
-	union {
-		float rgba[4];
-		struct {
-			float r, g, b, a;
-		};
-	} color;
+	union color color;
 
 	struct cell *cell;
 	double x, y;
@@ -82,6 +84,9 @@ struct ln {
 	double mx, my;
 	int window_width;
 	int window_height;
+
+	union color clear_color;
+	int dark_theme;
 
 	int grid_div;
 	struct cell *grid;

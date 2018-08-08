@@ -1,6 +1,7 @@
 
 #include "render.h"
 #include <stdio.h>
+#include <assert.h>
 #include "nanovg/nanovg.h"
 
 void draw_channel(NVGcontext *vg, struct channel *channel)
@@ -66,7 +67,7 @@ void draw_grid(NVGcontext *vg, int ww, int wh, int grid_div) {
 }
 
 
-void draw_node(NVGcontext *vg, struct node *node)
+void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 {
 	const float r = node->size;
 	/* const float pos = 500.0; */
@@ -83,21 +84,44 @@ void draw_node(NVGcontext *vg, struct node *node)
 		nvgRGBAf(node->color.r, node->color.g, node->color.b,
 			 node->color.a);
 
+	static const float adj = 0.3f;
+
+	NVGcolor clear =
+		nvgRGBAf(ln->clear_color.r,
+			 ln->clear_color.g,
+			 ln->clear_color.b,
+			 1.0f);
+
+	NVGcolor clear_adj =
+		nvgRGBAf(ln->clear_color.r * adj,
+			 ln->clear_color.g * adj,
+			 ln->clear_color.b * adj,
+			 1.0f);
+
 	NVGcolor blend =
-		nvgRGBAf(0, 0, 0, 1.0);
+		nvgRGBAf(node->color.r * adj,
+			 node->color.g * adj,
+			 node->color.b * adj,
+			 1.0f);
 
 	nvgSave(vg);
 	nvgTranslate(vg, node->x, node->y);
 
 	const float light = 2.0f;
-	bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, node_color, blend);
+
+	// TODO: use brightness instead of clear color for white theme
+	if (!ln->dark_theme)
+		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, clear, node_color);
+	else
+		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, node_color, blend);
+
 	nvgBeginPath(vg);
 	nvgCircle(vg, 0, 0, r);
 	/* nvgPathWinding(vg, NVG_HOLE); */
 
 	nvgStrokeWidth(vg, 3.0f);
-	nvgStrokeColor(vg, nvgRGBf(0.1, 0.1, 0.1));
-	/* nvgStroke(vg); */
+	nvgStrokeColor(vg, ln->dark_theme ? clear_adj : clear);
+	nvgStroke(vg);
 
 	nvgFillPaint(vg, bg);
 	nvgFill(vg);
@@ -125,5 +149,5 @@ void render_ln(struct ln *ln)
 		draw_channel(vg, &ln->channels[i]);
 
 	for (i = 0; i < ln->node_count; i++)
-		draw_node(vg, &ln->nodes[i]);
+		draw_node(vg, ln, &ln->nodes[i]);
 }

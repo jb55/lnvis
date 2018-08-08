@@ -75,9 +75,26 @@ int main()
 	srand(time(0));
 	// ln collision grid subdivision
 	// cells = grid_div * grid_div
-	int grid_div = 20;
+	static const int grid_div = 20;
+	static const int dark_theme = 1;
 
-	struct ln ln;
+	static const union color dark_color = {
+		.rgba = { 0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f }
+	};
+
+	static const union color light_color = {
+		.rgba = { 1.0, 1.0, 1.0, 1.0f }
+	};
+
+	// clear color
+	struct ln ln = {
+		.dark_theme = dark_theme
+	};
+
+	if (dark_theme)
+		memcpy(&ln.clear_color, &dark_color, sizeof(ln.clear_color));
+	else
+		memcpy(&ln.clear_color, &light_color, sizeof(ln.clear_color));
 
 	if (!glfwInit()) {
 		printf("Failed to init GLFW.");
@@ -132,6 +149,7 @@ int main()
 	glfwSetTime(0);
 	prevt = glfwGetTime();
 
+
 	glfwSetMouseButtonCallback(window, mouse_click);
 	glfwSetCursorPosCallback(window, mouse_pos);
 
@@ -174,11 +192,11 @@ int main()
 
 		// Update and render
 		glViewport(0, 0, fbWidth, fbHeight);
-		if (premult)
-			glClearColor(0, 0, 0, 0);
-		else // base16-onedark bg color ;)
-			glClearColor(0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f);
-			/* glClearColor(1.0f, 1.0f, 1.0f, 1.0f); */
+
+		glClearColor(ln.clear_color.r,
+			     ln.clear_color.g,
+			     ln.clear_color.b,
+			     ln.clear_color.a);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
