@@ -122,7 +122,7 @@ static void physics(struct ln *ln, double dt)
 	for (u32 i = 0; i < ln->node_count; i++) {
 		struct node *node = &ln->nodes[i];
 
-		repel_nearby(node, dt);
+		/* repel_nearby(node, dt); */
 
 		// semi-implicit euler
 		node->ax *= friction;
@@ -168,5 +168,5 @@ void update(struct ln *ln, double dt)
 
 	physics(ln, dt);
 
-	update_grid_move_nodes(ln);
+	/* update_grid_move_nodes(ln); */
 }
