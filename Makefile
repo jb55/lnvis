@@ -1,7 +1,7 @@
 
 BIN = lnvis
 PREFIX ?= /usr/local
-CFLAGS = -Ideps -ggdb -Os -Wall -Wextra -std=c99 \
+CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 \
          -Wno-implicit-fallthrough
 
 LDFLAGS = -lglfw -lGL

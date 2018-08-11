@@ -149,11 +149,11 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
  * Parse JSON string and fill tokens.
  */
 int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
-	       jsmntok_t *tokens, unsigned int num_tokens, int *count) {
+		jsmntok_t *tokens, unsigned int num_tokens) {
 	int r;
 	int i;
 	jsmntok_t *token;
-	*count = parser->toknext;
+	int count = parser->toknext;
 
 	for (; parser->pos < len && js[parser->pos] != '\0'; parser->pos++) {
 		char c;
@@ -162,7 +162,7 @@ int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
 		c = js[parser->pos];
 		switch (c) {
 			case '{': case '[':
-				(*count)++;
+				count++;
 				if (tokens == NULL) {
 					break;
 				}
@@ -231,7 +231,7 @@ int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
 			case '\"':
 				r = jsmn_parse_string(parser, js, len, tokens, num_tokens);
 				if (r < 0) return r;
-				(*count)++;
+				count++;
 				if (parser->toksuper != -1 && tokens != NULL)
 					tokens[parser->toksuper].size++;
 				break;
@@ -277,7 +277,7 @@ int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
 #endif
 				r = jsmn_parse_primitive(parser, js, len, tokens, num_tokens);
 				if (r < 0) return r;
-				(*count)++;
+				count++;
 				if (parser->toksuper != -1 && tokens != NULL)
 					tokens[parser->toksuper].size++;
 				break;
@@ -299,7 +299,7 @@ int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
 		}
 	}
 
-	return *count;
+	return count;
 }
 
 /**
@@ -311,3 +311,4 @@ void jsmn_init(jsmn_parser *parser) {
 	parser->toknext = 0;
 	parser->toksuper = -1;
 }
+
