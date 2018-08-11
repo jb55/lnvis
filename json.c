@@ -167,7 +167,7 @@ int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **pchanne
 
 		if (tok->type == JSMN_ARRAY)
 			continue;
-		
+
 		if (tok->type == JSMN_OBJECT) {
 			if (++objs > 2)
 				nchans++;
@@ -210,7 +210,7 @@ int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **pchanne
 			break;
 
 		case PARSING_FLAGS:
-			chan->satoshis = parse_u32(toklen, tokstr);
+			chan->flags = parse_u32(toklen, tokstr);
 			state = PARSING_TOKEN;
 			break;
 
@@ -249,7 +249,7 @@ int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **pchanne
 			}
 			break;
 		}
-		
+
 	}
 
 	*pchannels = channels;

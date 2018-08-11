@@ -103,7 +103,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 static void print_channel(struct channel *chan)
 {
-	printf("chan shortid=%u:%u:%hu public=%d sats=%llu active=%d "
+	printf("chan shortid=%u:%u:%hu public=%d sats=%"PRIu64" active=%d "
 	       "last_update=%u base_fee_msat=%u fee_per_millionth=%u "
 	       "delay=%u\n",
 	       chan->short_channel_id.blocknum,

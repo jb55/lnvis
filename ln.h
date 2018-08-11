@@ -81,12 +81,12 @@ struct channel {
 
 	u16 flags;
 
-	u64 satoshis;
-
 	u32 last_update_timestamp;
 	u32 delay;
 	u32 base_fee_msat;
 	u32 fee_per_millionth;
+
+	u64 satoshis;
 };
 
 enum display_flags {
