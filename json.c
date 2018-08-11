@@ -12,7 +12,7 @@
 
 struct parser {
 	const char *field;
-	enum parsing_state state;
+	enum channel_parsing_state state;
 };
 
 /* "source": "02fc7ef232bd958209a2180fb18844388babc48a81d31434e343ecc4d7dd1a9186",  */
@@ -27,15 +27,15 @@ struct parser {
 /* "fee_per_millionth": 1,  */
 /* "delay": 14 */
 static const struct parser channel_parsers[] = {
-	{ "short_channel_id",      PARSING_SHORTID },
-	{ "public",                PARSING_PUBLIC },
-	{ "satoshis",              PARSING_SATOSHIS },
-	{ "flags",                 PARSING_FLAGS },
-	{ "active",                PARSING_ACTIVE },
-	{ "last_update",           PARSING_LAST_UPDATE },
-	{ "base_fee_millisatoshi", PARSING_BASE_FEE },
-	{ "fee_per_millionth",     PARSING_FEE_PER },
-	{ "delay",                 PARSING_DELAY },
+	{ "short_channel_id",      PARSING_CHAN_SHORTID },
+	{ "public",                PARSING_CHAN_PUBLIC },
+	{ "satoshis",              PARSING_CHAN_SATOSHIS },
+	{ "flags",                 PARSING_CHAN_FLAGS },
+	{ "active",                PARSING_CHAN_ACTIVE },
+	{ "last_update",           PARSING_CHAN_LAST_UPDATE },
+	{ "base_fee_millisatoshi", PARSING_CHAN_BASE_FEE },
+	{ "fee_per_millionth",     PARSING_CHAN_FEE_PER },
+	{ "delay",                 PARSING_CHAN_DELAY },
 };
 
 #define MKTMPBUF \
@@ -140,6 +140,16 @@ int parse_json(FILE *fd, jsmntok_t **ptoks, int *ntoks, char **pbuffer) {
 	return 0;
 }
 
+
+int parse_clightning_nodes(FILE *fd, int *node_count, struct node **pnodes)
+{
+	(void)fd;
+	(void)node_count;
+	(void)pnodes;
+	return 0;
+}
+
+
 int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **pchannels)
 {
 	char *buffer;
@@ -152,7 +162,7 @@ int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **pchanne
 	char *tokstr;
 	int ntoks;
 	int toklen;
-	enum parsing_state state = PARSING_TOKEN;
+	enum channel_parsing_state state = PARSING_CHAN_TOKEN;
 	int rez = parse_json(fd, &toks, &ntoks, &buffer);
 	if (rez < 0)
 		return rez;
@@ -193,53 +203,53 @@ int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **pchanne
 
 		// TODO: lookup node id, assign nodes
 		switch (state) {
-		case PARSING_SHORTID:
+		case PARSING_CHAN_SHORTID:
 			parse_short_channel_id(toklen, tokstr,
 					       &chan->short_channel_id);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_PUBLIC:
+		case PARSING_CHAN_PUBLIC:
 			chan->public = tokeq(toklen, tokstr, "true");
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_SATOSHIS:
+		case PARSING_CHAN_SATOSHIS:
 			chan->satoshis = parse_u64(toklen, tokstr);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_FLAGS:
+		case PARSING_CHAN_FLAGS:
 			chan->flags = parse_u32(toklen, tokstr);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_ACTIVE:
+		case PARSING_CHAN_ACTIVE:
 			chan->active = tokeq(toklen, tokstr, "true");
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_LAST_UPDATE:
+		case PARSING_CHAN_LAST_UPDATE:
 			chan->last_update_timestamp = parse_u32(toklen, tokstr);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_BASE_FEE:
+		case PARSING_CHAN_BASE_FEE:
 			chan->base_fee_msat = parse_u32(toklen, tokstr);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_FEE_PER:
+		case PARSING_CHAN_FEE_PER:
 			chan->fee_per_millionth = parse_u32(toklen, tokstr);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_DELAY:
+		case PARSING_CHAN_DELAY:
 			chan->delay = parse_u32(toklen, tokstr);
-			state = PARSING_TOKEN;
+			state = PARSING_CHAN_TOKEN;
 			break;
 
-		case PARSING_TOKEN:
+		case PARSING_CHAN_TOKEN:
 			for (size_t i = 0; i < ARRAY_SIZE(channel_parsers); i++) {
 				if (tokeq(toklen, tokstr,
 					  channel_parsers[i].field)) {
