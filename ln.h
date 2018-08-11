@@ -6,6 +6,7 @@
 #include "defs.h"
 
 #define CELL_MAX_ELEMS 32
+#define MAX_ALIAS_SIZE 32
 
 union color {
 	float rgba[4];
@@ -16,7 +17,7 @@ union color {
 };
 
 struct node {
-	const char *alias;
+	char alias[MAX_ALIAS_SIZE];
 	const char *id; // pubkey
 
 	union color color;

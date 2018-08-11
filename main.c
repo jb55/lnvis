@@ -101,6 +101,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
+static void print_node(struct node *node)
+{
+	printf("node %s #%02X%02X%02X\n", node->alias,
+		(int)node->color.r * 255,
+		(int)node->color.g * 255,
+		(int)node->color.b * 255);
+}
+
 static void print_channel(struct channel *chan)
 {
 	printf("chan shortid=%u:%u:%hu public=%d sats=%"PRIu64" active=%d "
@@ -121,22 +129,40 @@ static void print_channel(struct channel *chan)
 
 void test_read_json()
 {
-	FILE *f = fopen("clightning-channels.json", "r");
+	FILE *channels_fd = fopen("clightning-channels.json", "r");
+	FILE *nodes_fd = fopen("clightning-nodes.json", "r");
+
 	int nchans = 0;
+	int node_count = 0;
+	int i;
 	struct channel *channels;
-	int res = parse_clightning_channels(f, &nchans, &channels);
+	struct node *nodes;
+
+	int res = parse_clightning_nodes(nodes_fd, &node_count, &nodes);
+	fclose(nodes_fd);
 
 	if (res != 0) {
-		printf("test_read_json res %d\n", res);
+		printf("parse_clightning_nodes res %d\n", res);
 		exit(1);
 	}
 
-	for (int i = 0; i < nchans; i++)
+	res = parse_clightning_channels(channels_fd, &nchans, &channels);
+	fclose(channels_fd);
+
+	if (res != 0) {
+		printf("parse_clightning_channels res %d\n", res);
+		exit(1);
+	}
+
+	for (i = 0; i < nchans; i++)
 		print_channel(&channels[i]);
 
-	printf("%d channels\n", nchans);
+	for (i = 0; i < node_count; i++)
+		print_node(&nodes[i]);
 
-	fclose(f);
+	printf("%d nodes, %d channels\n", node_count, nchans);
+
+
 	exit(0);
 }
 

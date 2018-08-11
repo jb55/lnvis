@@ -6,8 +6,11 @@
 #include <stdio.h>
 #include "ln.h"
 
-enum nodes_parsing_state {
-	PARSING_NODE_TOKEN
+enum node_parsing_state {
+	PARSING_NODE_TOKEN,
+	PARSING_NODE_ALIAS,
+	PARSING_NODE_COLOR,
+	PARSING_NODE_ADDRESSES,
 };
 
 enum channel_parsing_state {
@@ -23,7 +26,7 @@ enum channel_parsing_state {
 	PARSING_CHAN_DELAY,
 };
 
-int parse_clightning_channels(FILE *fd, int *nchannels,
-			      struct channel **channels);
+int parse_clightning_nodes(FILE *fd, int *node_count, struct node **nodes);
+int parse_clightning_channels(FILE *fd, int *nchannels, struct channel **channels);
 
 #endif /* LNVIS_JSON_H */

@@ -37,7 +37,7 @@ void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *
 	for (i = 0; i < num_nodes; ++i) {
 		n = &ln->nodes[i];
 
-		n->alias = "test";
+		strcpy(n->alias, "test");
 		n->color.r = rand_0to1();
 		n->color.g = rand_0to1();
 		n->color.b = rand_0to1();
