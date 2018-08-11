@@ -86,31 +86,31 @@ static void force_graph(struct ln *ln, double dt) {
 }
 
 
-static void repel_nearby(struct node *node, double dt)
-{
-	struct node *n = NULL;
-	struct cell *cell = node->cell;
+/* static void repel_nearby(struct node *node, double dt) */
+/* { */
+/* 	struct node *n = NULL; */
+/* 	struct cell *cell = node->cell; */
 
-	// might happen the first iteration?
-	if (cell == NULL)
-		return;
+/* 	// might happen the first iteration? */
+/* 	if (cell == NULL) */
+/* 		return; */
 
-	// we're the only one in this cell, there's nothing to repel
-	if (cell->node_count == 1)
-		return;
+/* 	// we're the only one in this cell, there's nothing to repel */
+/* 	if (cell->node_count == 1) */
+/* 		return; */
 
-	for (int i = 0; i < cell->node_count; ++i) {
-		n = cell->nodes[i];
+/* 	for (int i = 0; i < cell->node_count; ++i) { */
+/* 		n = cell->nodes[i]; */
 
-		// dont repel against ourselves
-		if (n == node)
-			continue;
+/* 		// dont repel against ourselves */
+/* 		if (n == node) */
+/* 			continue; */
 
-		assert(n);
-		assert(node);
-		repel_nodes(n, node, dt);
-	}
-}
+/* 		assert(n); */
+/* 		assert(node); */
+/* 		repel_nodes(n, node, dt); */
+/* 	} */
+/* } */
 
 
 static void physics(struct ln *ln, double dt)

@@ -66,15 +66,27 @@ enum side {
  *    - [`4`:`fee_proportional_millionths`]
  */
 
+struct short_channel_id {
+	u32 blocknum;
+	u32 txnum;
+	u16 outnum;
+};
+
 struct channel {
 	struct node *nodes[2];
 
-	u64 our_msatoshi;
-	/* Statistics for min and max our_msatoshi. */
-	u64 msatoshi_to_us_min;
-	u64 msatoshi_to_us_max;
+	struct short_channel_id short_channel_id;
+	u8 public;
+	u8 active;
 
-	u32 last_update;
+	u16 flags;
+
+	u64 satoshis;
+
+	u32 last_update_timestamp;
+	u32 delay;
+	u32 base_fee_msat;
+	u32 fee_per_millionth;
 };
 
 enum display_flags {

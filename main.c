@@ -101,11 +101,41 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
+static void print_channel(struct channel *chan)
+{
+	printf("chan shortid=%u:%u:%hu public=%d sats=%llu active=%d "
+	       "last_update=%u base_fee_msat=%u fee_per_millionth=%u "
+	       "delay=%u\n",
+	       chan->short_channel_id.blocknum,
+	       chan->short_channel_id.txnum,
+	       chan->short_channel_id.outnum,
+	       chan->public,
+	       chan->satoshis,
+	       chan->active,
+	       chan->last_update_timestamp,
+	       chan->base_fee_msat,
+	       chan->fee_per_millionth,
+	       chan->delay);
+}
+
+
 void test_read_json()
 {
 	FILE *f = fopen("clightning-channels.json", "r");
-	int res = parse_clightning_channels(f);
-	printf("test_read_json res %d\n", res);
+	int nchans = 0;
+	struct channel *channels;
+	int res = parse_clightning_channels(f, &nchans, &channels);
+
+	if (res != 0) {
+		printf("test_read_json res %d\n", res);
+		exit(1);
+	}
+
+	for (int i = 0; i < nchans; i++)
+		print_channel(&channels[i]);
+
+	printf("%d channels\n", nchans);
+
 	fclose(f);
 	exit(0);
 }

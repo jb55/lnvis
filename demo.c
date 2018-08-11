@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 #include "demo.h"
 #include <stdio.h>
 #include <string.h>
