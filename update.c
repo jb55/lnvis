@@ -31,7 +31,7 @@ void repel_nodes(struct node *n1, struct node *n2, double dt) {
 
 	double d = sqrt(dx*dx + dy*dy);
 
-	static const double mindist = 100.0;
+	static const double mindist = 200.0;
 	if (d < mindist) {
 
 		// normalized vector between two nodes
@@ -81,36 +81,39 @@ static void force_graph(struct ln *ln, double dt) {
 		struct node *n1 = channel->nodes[0];
 		struct node *n2 = channel->nodes[1];
 
+		if (!n1->filtered || !n2->filtered)
+			continue;
+
 		repel_nodes(n1, n2, dt);
 	}
 }
 
 
-/* static void repel_nearby(struct node *node, double dt) */
-/* { */
-/* 	struct node *n = NULL; */
-/* 	struct cell *cell = node->cell; */
+static void repel_nearby(struct node *node, double dt)
+{
+	struct node *n = NULL;
+	struct cell *cell = node->cell;
 
-/* 	// might happen the first iteration? */
-/* 	if (cell == NULL) */
-/* 		return; */
+	// might happen the first iteration?
+	if (cell == NULL)
+		return;
 
-/* 	// we're the only one in this cell, there's nothing to repel */
-/* 	if (cell->node_count == 1) */
-/* 		return; */
+	// we're the only one in this cell, there's nothing to repel
+	if (cell->node_count == 1)
+		return;
 
-/* 	for (int i = 0; i < cell->node_count; ++i) { */
-/* 		n = cell->nodes[i]; */
+	for (int i = 0; i < cell->node_count; ++i) {
+		n = cell->nodes[i];
 
-/* 		// dont repel against ourselves */
-/* 		if (n == node) */
-/* 			continue; */
+		// dont repel against ourselves
+		if (n == node)
+			continue;
 
-/* 		assert(n); */
-/* 		assert(node); */
-/* 		repel_nodes(n, node, dt); */
-/* 	} */
-/* } */
+		assert(n);
+		assert(node);
+		repel_nodes(n, node, dt);
+	}
+}
 
 
 static void physics(struct ln *ln, double dt)
@@ -121,6 +124,9 @@ static void physics(struct ln *ln, double dt)
 	// physics
 	for (u32 i = 0; i < ln->node_count; i++) {
 		struct node *node = &ln->nodes[i];
+
+		if (!node->filtered)
+			continue;
 
 		/* repel_nearby(node, dt); */
 
@@ -150,11 +156,14 @@ void update(struct ln *ln, double dt)
 	if (ln->clicked) {
 		struct node *hit = hit_node(ln);
 		ln->drag_target = hit;
+		ln->last_drag_target = hit;
 	}
 
 	// stop dragging
-	if (!ln->mdown && ln->drag_target)
+	if (!ln->mdown && ln->drag_target) {
+		ln->last_drag_target = ln->drag_target;
 		ln->drag_target = NULL;
+	}
 
 	// drag
 	if (ln->mdown && ln->drag_target) {
@@ -164,9 +173,9 @@ void update(struct ln *ln, double dt)
 		ln->drag_target->vy = 0;
 	}
 
-	force_graph(ln, dt);
+	/* force_graph(ln, dt); */
 
-	physics(ln, dt);
+	/* physics(ln, dt); */
 
 	/* update_grid_move_nodes(ln); */
 }

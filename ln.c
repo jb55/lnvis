@@ -19,6 +19,22 @@ static double rand_0to1() {
 	return (double) rand() / RAND_MAX;
 }
 
+void init_network(int ww, int wh, struct ln *ln) {
+	struct node *n;
+
+	for (u32 i = 0; i < ln->node_count; ++i) {
+		n = &ln->nodes[i];
+
+		n->x = ww * rand_0to1();
+		n->y = wh * rand_0to1();
+		n->ax = 0.0;
+		n->ay = 0.0;
+		n->vx = 0.0;
+		n->vy = 0.0;
+		n->size = 10;
+	}
+}
+
 void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *ln) {
 	int i, j;
 	int from, to;
@@ -83,5 +99,55 @@ void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *
 		}
 
 		// keep trying until we find on that isn't already connected
+	}
+}
+
+
+static void print_node(struct node *node)
+{
+	printf("node %s #%02X%02X%02X\n", node->alias,
+	       (int)(node->color.r * 255.0f),
+	       (int)(node->color.g * 255.0f),
+	       (int)(node->color.b * 255.0f));
+}
+
+
+
+void filter_network(const char *nodeid, struct ln *ln)
+{
+	u32 i;
+	struct node *node = NULL;
+	struct channel *chan = NULL;
+	ln->filter = (char*)nodeid;
+
+	for (i = 0; i < ln->node_count; i++) {
+		node = &ln->nodes[i];
+
+		if (streq(nodeid, node->id) || rand_0to1() < 0.002) {
+			node->filtered = 1;
+			printf("filtering ");
+			print_node(node);
+		}
+		else
+			node->filtered = 0;
+	}
+
+	for (i = 0; i < ln->channel_count; i++) {
+		chan = &ln->channels[i];
+
+		if (chan->nodes[0]->filtered)
+			chan->nodes[1]->mark_filtered = 1;
+
+		if (chan->nodes[1]->filtered)
+			chan->nodes[0]->mark_filtered = 1;
+	}
+
+	for (i = 0; i < ln->node_count; i++) {
+		node = &ln->nodes[i];
+
+		if (node->mark_filtered) {
+			node->filtered = 1;
+			node->mark_filtered = 0;
+		}
 	}
 }

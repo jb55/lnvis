@@ -10,6 +10,7 @@ enum node_parsing_state {
 	PARSING_NODE_TOKEN,
 	PARSING_NODE_ALIAS,
 	PARSING_NODE_COLOR,
+	PARSING_NODE_ID,
 	PARSING_NODE_ADDRESSES,
 };
 
@@ -24,6 +25,8 @@ enum channel_parsing_state {
 	PARSING_CHAN_BASE_FEE,
 	PARSING_CHAN_FEE_PER,
 	PARSING_CHAN_DELAY,
+	PARSING_CHAN_SOURCE,
+	PARSING_CHAN_DESTINATION,
 };
 
 int parse_clightning_nodes(FILE *fd, int *node_count, struct node **nodes);

@@ -11,11 +11,6 @@
 #define ERROR_READING_CHANNELS -2
 #define ERROR_ALLOCATING_CHANNELS -3
 
-#define min(a,b)				\
-	({ __typeof__ (a) _a = (a);		\
-	   __typeof__ (b) _b = (b);	\
-		_a < _b ? _a : _b; })
-
 struct channel_parser {
 	const char *field;
 	enum channel_parsing_state state;
@@ -39,6 +34,8 @@ struct node_parser {
 /* "fee_per_millionth": 1,  */
 /* "delay": 14 */
 static const struct channel_parser channel_parsers[] = {
+	{ "source",                PARSING_CHAN_SOURCE },
+	{ "destination",           PARSING_CHAN_DESTINATION },
 	{ "short_channel_id",      PARSING_CHAN_SHORTID },
 	{ "public",                PARSING_CHAN_PUBLIC },
 	{ "satoshis",              PARSING_CHAN_SATOSHIS },
@@ -61,8 +58,9 @@ static const struct channel_parser channel_parsers[] = {
 /* 	  "port": 9735 */
 /* 	}] */
 static const struct node_parser node_parsers[] = {
-	{ "alias", PARSING_NODE_ALIAS },
-	{ "color", PARSING_NODE_COLOR },
+	{ "nodeid",    PARSING_NODE_ID },
+	{ "alias",     PARSING_NODE_ALIAS },
+	{ "color",     PARSING_NODE_COLOR },
 	{ "addresses", PARSING_NODE_ADDRESSES },
 };
 
@@ -181,14 +179,14 @@ static void parse_color(int toklen, const char *tokstr, union color *color) {
 		goto colorerr;
 
 	for (int i = 0; i < 3; i++) {
-		u8 c1 = tokstr[i];
-		u8 c2 = tokstr[i+1];
+		u8 c1 = tokstr[i*2];
+		u8 c2 = tokstr[i*2+1];
 
 		if (!isxdigit(c1) || !isxdigit(c2))
 			goto colorerr;
 
 		u8 val = hexdigit(c1) << 4 | hexdigit(c2);
-		color->rgba[i] = val / 255.0f;
+		color->rgba[i] = ((float)val) / 255.0f;
 	}
 
 	return;
@@ -214,6 +212,8 @@ int parse_clightning_nodes(FILE *fd, int *node_count, struct node **pnodes)
 
 	nodes = calloc(nodecap, sizeof(struct node));
 
+	int acount = 0;
+
 	int rez = parse_json(fd, &toks, &ntoks, &buffer);
 	if (rez < 0)
 		return rez;
@@ -221,8 +221,15 @@ int parse_clightning_nodes(FILE *fd, int *node_count, struct node **pnodes)
 	for (i = 0; i < ntoks; i++) {
 		tok = &toks[i];
 
-		if (tok->type == JSMN_ARRAY)
+		if (tok->type == JSMN_ARRAY) {
+			if (state == PARSING_NODE_ADDRESSES) {
+				if (++acount == 1) {
+					acount = 0;
+					state = PARSING_NODE_TOKEN;
+				}
+			}
 			continue;
+		}
 
 		if (tok->type == JSMN_OBJECT) {
 			if (state == PARSING_NODE_ADDRESSES)
@@ -251,6 +258,11 @@ int parse_clightning_nodes(FILE *fd, int *node_count, struct node **pnodes)
 		}
 
 		switch (state) {
+		case PARSING_NODE_ID:
+			strncpy(node->id, tokstr, min(toklen, PUBKEY_SIZE));
+			state = PARSING_NODE_TOKEN;
+			break;
+
 		case PARSING_NODE_ALIAS:
 			strncpy(node->alias, tokstr, min(toklen, MAX_ALIAS_SIZE));
 			state = PARSING_NODE_TOKEN;
@@ -336,6 +348,16 @@ int parse_clightning_channels(FILE *fd, int *nchans, struct channel **pchannels)
 
 		// TODO: lookup node id, assign nodes
 		switch (state) {
+		case PARSING_CHAN_SOURCE:
+			strncpy(chan->source, tokstr, min(PUBKEY_SIZE, toklen));
+			state = PARSING_CHAN_TOKEN;
+			break;
+
+		case PARSING_CHAN_DESTINATION:
+			strncpy(chan->destination, tokstr, min(PUBKEY_SIZE, toklen));
+			state = PARSING_CHAN_TOKEN;
+			break;
+
 		case PARSING_CHAN_SHORTID:
 			parse_short_channel_id(toklen, tokstr,
 					       &chan->short_channel_id);

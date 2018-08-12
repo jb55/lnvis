@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <assert.h>
 #ifdef NANOVG_GLEW
 #include <GL/glew.h>
 #endif
@@ -101,14 +102,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-static void print_node(struct node *node)
-{
-	printf("node %s #%02X%02X%02X\n", node->alias,
-		(int)node->color.r * 255,
-		(int)node->color.g * 255,
-		(int)node->color.b * 255);
-}
-
 static void print_channel(struct channel *chan)
 {
 	printf("chan shortid=%u:%u:%hu public=%d sats=%"PRIu64" active=%d "
@@ -126,13 +119,41 @@ static void print_channel(struct channel *chan)
 	       chan->delay);
 }
 
+static struct node *find_node(const char *pubkey, struct node *nodes, int node_count)
+{
+	// TODO: hash table
+	for (int i = 0; i < node_count; i++) {
+		if (streq(pubkey, nodes[i].id))
+			return &nodes[i];
+		/* printf("%s != %s\n", pubkey, nodes[i].id); */
+	}
 
-void test_read_json()
+	return NULL;
+}
+
+
+static void connect_node_channels(struct node *nodes, int node_count,
+				  struct channel *channels, int channel_count)
+{
+	struct channel *chan = NULL;
+
+	for (int i = 0; i < channel_count; i++) {
+		chan = &channels[i];
+
+		chan->nodes[0] = find_node(chan->source, nodes, node_count);
+		chan->nodes[1] = find_node(chan->destination, nodes, node_count);
+
+		assert(chan->nodes[0]);
+		assert(chan->nodes[1]);
+	}
+}
+
+void test_read_json(struct ln *ln)
 {
 	FILE *channels_fd = fopen("clightning-channels.json", "r");
 	FILE *nodes_fd = fopen("clightning-nodes.json", "r");
 
-	int nchans = 0;
+	int channel_count = 0;
 	int node_count = 0;
 	int i;
 	struct channel *channels;
@@ -146,7 +167,7 @@ void test_read_json()
 		exit(1);
 	}
 
-	res = parse_clightning_channels(channels_fd, &nchans, &channels);
+	res = parse_clightning_channels(channels_fd, &channel_count, &channels);
 	fclose(channels_fd);
 
 	if (res != 0) {
@@ -154,16 +175,13 @@ void test_read_json()
 		exit(1);
 	}
 
-	for (i = 0; i < nchans; i++)
-		print_channel(&channels[i]);
+	printf("parsed %d nodes, %d channels\n", node_count, channel_count);
 
-	for (i = 0; i < node_count; i++)
-		print_node(&nodes[i]);
-
-	printf("%d nodes, %d channels\n", node_count, nchans);
-
-
-	exit(0);
+	connect_node_channels(nodes, node_count, channels, channel_count);
+	ln->channels = channels;
+	ln->channel_count = channel_count;
+	ln->nodes = nodes;
+	ln->node_count = node_count;
 }
 
 int main()
@@ -182,12 +200,13 @@ int main()
 	static const int dark_theme = 1;
 
 	u64 flags = DISP_DARK
-		  /* | DISP_ALIASES */
+		  | DISP_ALIASES
 		  | DISP_GRID
-		  /* | DISP_STROKE_NODES */
+		  | DISP_STROKE_NODES
 		  ;
 
-	test_read_json();
+	const char *filter = "03f3c108ccd536b8526841f0a5c58212bb9e6584a1eb493080e7c1cc34f82dad71";
+	test_read_json(&ln);
 
 	ln.display_flags = flags;
 
@@ -239,6 +258,7 @@ int main()
 	}
 
 	ln.vg = vg;
+
 	init_ln(&ln, grid_div);
 
 	if (loadDemoData(vg, &data) == -1)
@@ -280,8 +300,9 @@ int main()
 		ln.window_width = winWidth;
 
 		if (first) {
-			random_network(winWidth, winHeight, 3, 500, &ln);
-			printf("channels %d\n", ln.channel_count);
+			/* random_network(winWidth, winHeight, 3, 500, &ln); */
+			init_network(winWidth, winHeight, &ln);
+			filter_network(filter, &ln);
 			first = 0;
 		}
 

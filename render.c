@@ -1,14 +1,21 @@
 
 #include "render.h"
+#include "defs.h"
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 #include "nanovg/nanovg.h"
 
-void draw_channel(NVGcontext *vg, struct channel *channel)
+void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 {
 	const struct node *n1 = channel->nodes[0];
 	const struct node *n2 = channel->nodes[1];
-	static const float stroke = 2.0f;
+
+	if (!(n1->filtered && n2->filtered))
+		return;
+
+	const float stroke = max(1.0, channel->satoshis * 0.000001f);
+	/* const float stroke = (logf(channel->satoshis) / logf(10)) * 0.0f; */
 
 	const float sx = n1->x;
 	const float sy = n1->y;
@@ -16,10 +23,19 @@ void draw_channel(NVGcontext *vg, struct channel *channel)
 	const float ex = n2->x;
 	const float ey = n2->y;
 
+	union color n1t, n2t;
+
+	n1t.nvg_color = n1->color.nvg_color;
+	n2t.nvg_color = n2->color.nvg_color;
+
+	if (n1 != ln->last_drag_target)
+		n1t.a = 0.4;
+
+	if (n2 != ln->last_drag_target)
+		n2t.a = 0.4;
+
 	NVGpaint linear_grad =
-		nvgLinearGradient(vg, sx, sy, ex, ey,
-				  n1->color.nvg_color,
-				  n2->color.nvg_color);
+		nvgLinearGradient(vg, sx, sy, ex, ey, n1t.nvg_color, n2t.nvg_color);
 
 	nvgSave(vg);
 	nvgStrokeWidth(vg, stroke);
@@ -70,20 +86,30 @@ void draw_grid(NVGcontext *vg, struct ln *ln) {
 
 void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 {
-	const float r = node->size;
-	/* const float pos = 500.0; */
+	if (!node->filtered)
+		return;
 
-	/* const float h = r; */
-	/* const float w = r; */
-	/* const float x = pos; */
-	/* const float y = pos; */
-	/* const float kr = (int)(h * 0.35f); */
-	/* const float cy = y + (int)(h * 0.5f); */
+	nvgFontSize(vg, 18.0f);
+	nvgFontFace(vg, "sans");
+	nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+
+	const float r = node->size;
+	float bounds[4];
+	static const float pad = 2.0f;
+
+	nvgTextBounds(vg, 0, 0, node->alias, NULL, &bounds);
+
 	NVGpaint bg;
 
+	/* if (streq(node->alias, "@jb55")) */
+	/* 	printf("%f %f %f\n", node->color.r, */
+	/* 		node->color.g, node->color.b); */
+
 	NVGcolor node_color =
-		nvgRGBAf(node->color.r, node->color.g, node->color.b,
-			 node->color.a);
+		nvgRGBf(node->color.r, node->color.g, node->color.b);
+
+	NVGcolor node_color_inv =
+		nvgRGBf(1.0-node->color.r, 1.0-node->color.g, 1.0-node->color.b);
 
 	static const float adj = 0.3f;
 
@@ -105,7 +131,7 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	const float light = 2.0f;
 	const int dark_theme = ln->display_flags & DISP_DARK;
 
-	// TODO: use brightness instead of clear color for white theme
+	//TODO: use brightness instead of clear color for white theme
 	if (!dark_theme)
 		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0,
 				       ln->clear_color.nvg_color,
@@ -127,12 +153,15 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	nvgFill(vg);
 
 	if (ln->display_flags & DISP_ALIASES) {
-		nvgFontSize(vg, 18.0f);
-		nvgFontFace(vg, "sans");
-		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, -bounds[2] / 2.0, bounds[3], bounds[2], bounds[3], 5.0);
+		nvgFillColor(vg, nvgRGBAf(node_color.r, node_color.g, node_color.b, 0.9));
+		nvgFill(vg);
+
 		/* nvgTextMetrics(vg, NULL, NULL, &lineh); */
-		nvgFillColor(vg, node_color);
-		nvgText(vg, -r, r, node->alias, NULL);
+		nvgFillColor(vg, node_color_inv);
+		nvgText(vg, -bounds[2] / 2.0, bounds[3], node->alias, NULL);
 	}
 
 	nvgRestore(vg);
@@ -147,7 +176,7 @@ void render_ln(struct ln *ln)
 
 	// render channels first
 	for (i = 0; i < ln->channel_count; i++)
-		draw_channel(vg, &ln->channels[i]);
+		draw_channel(vg, ln, &ln->channels[i]);
 
 	for (i = 0; i < ln->node_count; i++)
 		draw_node(vg, ln, &ln->nodes[i]);
