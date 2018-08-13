@@ -35,6 +35,7 @@ static inline int streq(const char *a, const char *b)
 		_a > _b ? _a : _b; })
 
 
+#define nodeid_eq streq
 
 #endif /* LNVIS_DEFS_H */
 

@@ -9,6 +9,8 @@ struct node *hit_node(struct ln *ln) {
 	for (u32 i = 0; i < ln->node_count; ++i)
 	{
 		struct node *n = &ln->nodes[i];
+		if (!n->filtered)
+			continue;
 
 		const double dx = fabs(n->x - ln->mx);
 		const double dy = fabs(n->y - ln->my);
@@ -157,6 +159,8 @@ void update(struct ln *ln, double dt)
 		struct node *hit = hit_node(ln);
 		ln->drag_target = hit;
 		ln->last_drag_target = hit;
+		if (hit != NULL)
+			filter_network(NULL, hit, ln);
 	}
 
 	// stop dragging

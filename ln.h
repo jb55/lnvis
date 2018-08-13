@@ -96,6 +96,9 @@ struct channel {
 	u32 fee_per_millionth;
 
 	u64 satoshis;
+
+	// app specific stuff
+	int draw_last;
 };
 
 enum display_flags {
@@ -135,6 +138,6 @@ void init_ln(struct ln *ln, int grid_div);
 void free_ln(struct ln *ln);
 void random_network(int ww, int wh, int max_per_node, int num_nodes, struct ln *ln);
 void init_network(int ww, int wh, struct ln *ln);
-void filter_network(const char *nodeid, struct ln *ln);
+void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln);
 
 #endif /* LNVIS_LN_H */

@@ -28,19 +28,28 @@ void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 	n1t.nvg_color = n1->color.nvg_color;
 	n2t.nvg_color = n2->color.nvg_color;
 
-	if (n1 != ln->last_drag_target)
-		n1t.a = 0.4;
+	NVGcolor c;
 
-	if (n2 != ln->last_drag_target)
-		n2t.a = 0.4;
+	if (nodeid_eq(channel->source, n1->id))
+		c = n1t.nvg_color;
+	else
+		c = n2t.nvg_color;
 
-	NVGpaint linear_grad =
-		nvgLinearGradient(vg, sx, sy, ex, ey, n1t.nvg_color, n2t.nvg_color);
+	if (channel->nodes[0] == ln->last_drag_target ||
+	    channel->nodes[1] == ln->last_drag_target)
+		c.a = 1.0;
+	else
+		c.a = 0.4;
+
+
+	/* NVGpaint linear_grad = */
+	/* 	nvgLinearGradient(vg, sx, sy, ex, ey, n1t.nvg_color, n2t.nvg_color); */
 
 	nvgSave(vg);
 	nvgStrokeWidth(vg, stroke);
 
-	nvgStrokePaint(vg, linear_grad);
+	/* nvgStrokePaint(vg, linear_grad); */
+	nvgStrokeColor(vg, c);
 	nvgBeginPath(vg);
 	nvgMoveTo(vg, n1->x, n1->y);
 	nvgLineTo(vg, n2->x, n2->y);
@@ -155,7 +164,7 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	if (ln->display_flags & DISP_ALIASES) {
 
 		nvgBeginPath(vg);
-		nvgRoundedRect(vg, -bounds[2] / 2.0, bounds[3], bounds[2], bounds[3], 5.0);
+		nvgRoundedRect(vg, -bounds[2] / 2.0 - pad, bounds[3] - pad, bounds[2] + pad * 2.0, bounds[3] + pad * 2.0, 5.0);
 		nvgFillColor(vg, nvgRGBAf(node_color.r, node_color.g, node_color.b, 0.9));
 		nvgFill(vg);
 
@@ -172,11 +181,32 @@ void render_ln(struct ln *ln)
 	u32 i;
 	NVGcontext *vg = ln->vg;
 
+	struct channel *draw_last = NULL, *c = NULL;
+
 	draw_grid(vg, ln);
 
 	// render channels first
-	for (i = 0; i < ln->channel_count; i++)
-		draw_channel(vg, ln, &ln->channels[i]);
+	for (i = 0; i < ln->channel_count; i++) {
+		c = &ln->channels[i];
+
+		if (c->nodes[0] == ln->last_drag_target ||
+		    c->nodes[1] == ln->last_drag_target)
+			c->draw_last = 1;
+		else
+			draw_channel(vg, ln, c);
+	}
+
+	// draw important channels last
+	for (i = 0; i < ln->channel_count; i++) {
+		c = &ln->channels[i];
+
+		if (!c->draw_last)
+			continue;
+
+		c->draw_last = 0;
+		draw_channel(vg, ln, c);
+	}
+
 
 	for (i = 0; i < ln->node_count; i++)
 		draw_node(vg, ln, &ln->nodes[i]);

@@ -113,7 +113,7 @@ static void print_node(struct node *node)
 
 
 
-void filter_network(const char *nodeid, struct ln *ln)
+void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 {
 	u32 i;
 	struct node *node = NULL;
@@ -123,11 +123,8 @@ void filter_network(const char *nodeid, struct ln *ln)
 	for (i = 0; i < ln->node_count; i++) {
 		node = &ln->nodes[i];
 
-		if (streq(nodeid, node->id) || rand_0to1() < 0.002) {
+		if (filter_node == node || (nodeid && streq(nodeid, node->id)))
 			node->filtered = 1;
-			printf("filtering ");
-			print_node(node);
-		}
 		else
 			node->filtered = 0;
 	}

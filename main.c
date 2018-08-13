@@ -302,7 +302,7 @@ int main()
 		if (first) {
 			/* random_network(winWidth, winHeight, 3, 500, &ln); */
 			init_network(winWidth, winHeight, &ln);
-			filter_network(filter, &ln);
+			filter_network(filter, NULL, &ln);
 			first = 0;
 		}
 
