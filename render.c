@@ -5,9 +5,36 @@
 #include <assert.h>
 #include <math.h>
 #include "nanovg/nanovg.h"
+#include <stdlib.h>
+
+
+#define  Pr  .299
+#define  Pg  .587
+#define  Pb  .114
+
+static inline double rand_0to1() {
+	return (double) rand() / RAND_MAX;
+}
+
+
+void saturate(union color *c, double change)
+{
+	double  P=sqrt(
+		(c->r)*(c->r)*Pr+
+		(c->g)*(c->g)*Pg+
+		(c->b)*(c->b)*Pb ) ;
+
+	c->r = P+((c->r)-P)*change;
+	c->g = P+((c->g)-P)*change;
+	c->b = P+((c->b)-P)*change;
+}
+
 
 void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 {
+	if (channel->filtered == 1)
+		return;
+
 	const struct node *n1 = channel->nodes[0];
 	const struct node *n2 = channel->nodes[1];
 
@@ -35,11 +62,17 @@ void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 	else
 		c = n2t.nvg_color;
 
-	if (channel->nodes[0] == ln->last_drag_target ||
-	    channel->nodes[1] == ln->last_drag_target)
+	if ((channel->nodes[0] == ln->last_drag_target ||
+	     channel->nodes[1] == ln->last_drag_target))
 		c.a = 1.0;
-	else
-		c.a = 0.4;
+	else {
+		if (ln->drag_target) {
+			saturate((union color*)&c, 0.01);
+			c.a = 0.1;
+		}
+		else
+			c.a = 0.4;
+	}
 
 
 	/* NVGpaint linear_grad = */
@@ -51,8 +84,50 @@ void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 	/* nvgStrokePaint(vg, linear_grad); */
 	nvgStrokeColor(vg, c);
 	nvgBeginPath(vg);
+
+#define TAU (2.0*NVG_PI)
+
+
+
 	nvgMoveTo(vg, n1->x, n1->y);
-	nvgLineTo(vg, n2->x, n2->y);
+
+	if (ln->display_flags & DISP_BEZIER) {
+		srand(channel->short_channel_id.blocknum ^
+		      channel->short_channel_id.outnum ^
+		      channel->short_channel_id.txnum);
+		float ang1 = TAU*rand_0to1();
+		float ang2 = TAU*rand_0to1();
+
+		float dx = n2->x - n1->x;
+		float dy = n2->y - n1->y;
+
+		float len = sqrt(dx*dx + dy*dy);
+
+		/* float nx = dx/len; */
+		/* float ny = dy/len; */
+
+		const float dist = 1.0/3.0;
+
+		float ax1 = cos(ang1) * len * dist;
+		float ay1 = sin(ang1) * len * dist;
+
+		float ax2 = cos(ang2) * len * dist;
+		float ay2 = sin(ang2) * len * dist;
+
+		nvgBezierTo(vg, n1->x + ax1,
+			        n1->y + ay1,
+			        n2->x - ax2,
+			        n2->y - ay2,
+			        n2->x, n2->y);
+	}
+	else {
+		nvgLineTo(vg, n2->x, n2->y);
+	}
+	/* nvgMoveTo(vg, n2->x, n2->y); */
+	/* nvgArc(vg, n1->x, n1->y, TAU*4.0, TAU/8.0, 100.0, NVG_CCW); */
+	/* nvgClosePath(vg); */
+	/* nvgArcTo(vg, n1->x, n1->y, n2->x, n2->y, 100.0); */
+	/* nvgLineTo(vg, n2->x, n2->y); */
 	nvgStroke(vg);
 	nvgRestore(vg);
 }

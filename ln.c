@@ -132,6 +132,9 @@ void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 	for (i = 0; i < ln->channel_count; i++) {
 		chan = &ln->channels[i];
 
+		if (i % 2 == 0)
+			chan->filtered = 1;
+
 		if (chan->nodes[0]->filtered)
 			chan->nodes[1]->mark_filtered = 1;
 

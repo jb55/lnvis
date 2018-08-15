@@ -98,6 +98,7 @@ struct channel {
 	u64 satoshis;
 
 	// app specific stuff
+	int filtered;
 	int draw_last;
 };
 
@@ -106,12 +107,14 @@ enum display_flags {
 	DISP_GRID         = 1UL << 1,
 	DISP_ALIASES      = 1UL << 2,
 	DISP_STROKE_NODES = 1UL << 3,
+	DISP_BEZIER       = 1UL << 4,
 };
 
 struct ln {
 	NVGcontext *vg;
 
 	int clicked;
+	int right_clicked;
 	int mdown;
 	double mx, my;
 	int window_width;

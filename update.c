@@ -159,6 +159,10 @@ void update(struct ln *ln, double dt)
 		struct node *hit = hit_node(ln);
 		ln->drag_target = hit;
 		ln->last_drag_target = hit;
+	}
+
+	if (ln->right_clicked) {
+		struct node *hit = hit_node(ln);
 		if (hit != NULL)
 			filter_network(NULL, hit, ln);
 	}

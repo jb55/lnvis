@@ -303,6 +303,7 @@ int parse_clightning_channels(FILE *fd, int *nchans, struct channel **pchannels)
 	char *buffer;
 	void *res;
 	struct channel *chan = NULL, *channels;
+	struct short_channel_id last_chan;
 	int chancap = 4096;
 	jsmntok_t *toks;
 	jsmntok_t *tok;
@@ -346,7 +347,6 @@ int parse_clightning_channels(FILE *fd, int *nchans, struct channel **pchannels)
 
 		chan = &channels[*nchans];
 
-		// TODO: lookup node id, assign nodes
 		switch (state) {
 		case PARSING_CHAN_SOURCE:
 			strncpy(chan->source, tokstr, min(PUBKEY_SIZE, toklen));

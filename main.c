@@ -42,7 +42,9 @@ static void key(GLFWwindow *window, int key, int scancode, int action, int mods)
 static struct ln ln;
 static double mx, my;
 static int mdown = 0;
+static int rmdown = 0;
 static int mclicked = 0;
+static int rmclicked = 0;
 
 static const union color dark_color = {
 	.rgba = { 0x28 / 255.0, 0x2c / 255.0, 0x34 / 255.0, 1.0f }
@@ -68,9 +70,12 @@ void mouse_click(GLFWwindow *win, int button, int action, int mods)
 	(void)mods;
 
 	mclicked = action == 1 && button == 0;
+	rmclicked = action == 1 && button == 1;
 
 	if (button == 0)
 		mdown = action;
+	if (button == 1)
+		rmdown = action;
 }
 
 
@@ -90,6 +95,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_G:
 			ln.display_flags ^= DISP_GRID;
+			break;
+		case GLFW_KEY_B:
+			ln.display_flags ^= DISP_BEZIER;
 			break;
 		case GLFW_KEY_T:
 			if (ln.display_flags & DISP_DARK)
@@ -276,6 +284,8 @@ int main()
 	while (!glfwWindowShouldClose(window)) {
 		if (ln.clicked)
 			ln.clicked = 0;
+		if (ln.right_clicked)
+			ln.right_clicked = 0;
 		double t, dt;
 		int winWidth, winHeight;
 		int fbWidth, fbHeight;
@@ -288,6 +298,9 @@ int main()
 
 		ln.clicked = mclicked;
 		mclicked = 0;
+
+		ln.right_clicked = rmclicked;
+		rmclicked = 0;
 
 		ln.mx = mx;
 		ln.my = my;
