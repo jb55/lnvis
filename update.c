@@ -150,22 +150,51 @@ static void physics(struct ln *ln, double dt)
 }
 
 
+static void print_channel_info(struct channel chan)
+
+
+static void handle_click(struct ln *ln)
+{
+	// click detection
+	struct channel *chan = NULL;
+	struct node *hit = hit_node(ln);
+
+	ln->drag_target = hit;
+	ln->last_drag_target = hit;
+
+	if (!hit)
+		return;
+
+	// print some info about channels
+	for (u32 i = 0; i < ln->channel_count; i++) {
+		chan = &ln->channels[i];
+
+		if (chan->filtered)
+			continue;
+
+		if (nodeid_eq(chan->nodes[0]->id, hit->id) ||
+		    nodeid_eq(chan->nodes[1]->id, hit->id))
+			print_channel_info(chan);
+	}
+}
+
+
+static void handle_rightclick(struct ln *ln)
+{
+	struct node *hit = hit_node(ln);
+	if (hit != NULL)
+		filter_network(NULL, hit, ln);
+}
+
 
 // force graph update logic
 void update(struct ln *ln, double dt)
 {
-	// click detection
-	if (ln->clicked) {
-		struct node *hit = hit_node(ln);
-		ln->drag_target = hit;
-		ln->last_drag_target = hit;
-	}
+	if (ln->clicked)
+		handle_click(ln);
 
-	if (ln->right_clicked) {
-		struct node *hit = hit_node(ln);
-		if (hit != NULL)
-			filter_network(NULL, hit, ln);
-	}
+	if (ln->right_clicked)
+		handle_rightclick(ln);
 
 	// stop dragging
 	if (!ln->mdown && ln->drag_target) {
