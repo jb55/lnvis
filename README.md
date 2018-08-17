@@ -28,3 +28,13 @@ s             toggle stroked nodes (small perf boost)
 left click    move + focus node
 right click   filter node
 ```
+
+## Building
+
+Install dependencies (`glfw3`)
+
+    $ sudo apt-get install libglfw3-dev
+
+Build
+
+    $ make
