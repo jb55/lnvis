@@ -1,9 +1,9 @@
 
 BIN = lnvis
 PREFIX ?= /usr/local
-CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 -DJSMN_PARENT_LINKS
+CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 -DJSMN_PARENT_LINKS $(TRAVIS_CFLAGS)
 
-LDFLAGS = -lglfw -lGL -lm
+LDFLAGS = $(TRAVIS_LDFLAGS) -lglfw -lGL -lm
 
 
 SRCS = main.c
@@ -28,7 +28,7 @@ include $(OBJS:.o=.d)
 	$(CC) -MM $(CFLAGS) $< > $@
 
 $(BIN): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ $(LDFLAGS)  -o $@
 
 TAGS: fake
 	etags $(SRCS)
