@@ -9,7 +9,7 @@ struct node *hit_node(struct ln *ln) {
 	for (u32 i = 0; i < ln->node_count; ++i)
 	{
 		struct node *n = &ln->nodes[i];
-		if (!n->filtered)
+		if (!n->visible)
 			continue;
 
 		const double dx = fabs(n->x - ln->mx);
@@ -83,7 +83,7 @@ static void force_graph(struct ln *ln, double dt) {
 		struct node *n1 = channel->nodes[0];
 		struct node *n2 = channel->nodes[1];
 
-		if (!n1->filtered || !n2->filtered)
+		if (!n1->visible || !n2->visible)
 			continue;
 
 		repel_nodes(n1, n2, dt);
@@ -127,7 +127,7 @@ static void physics(struct ln *ln, double dt)
 	for (u32 i = 0; i < ln->node_count; i++) {
 		struct node *node = &ln->nodes[i];
 
-		if (!node->filtered)
+		if (!node->visible)
 			continue;
 
 		/* repel_nearby(node, dt); */
@@ -150,7 +150,17 @@ static void physics(struct ln *ln, double dt)
 }
 
 
-static void print_channel_info(struct channel chan)
+static void print_channel_info(struct channel *chan)
+{
+	printf("%u:%u:%hu %s -> %s (%f bits)\n",
+	       chan->short_channel_id.blocknum,
+	       chan->short_channel_id.txnum,
+	       chan->short_channel_id.outnum,
+	       chan->nodes[0]->alias,
+	       chan->nodes[1]->alias,
+	       chan->satoshis / 100.0
+		);
+}
 
 
 static void handle_click(struct ln *ln)
@@ -166,15 +176,36 @@ static void handle_click(struct ln *ln)
 		return;
 
 	// print some info about channels
+	printf("\nchannels\n--------\n");
+
+	for (u32 i = 0; i < ln->channel_count; i++) {
+		chan = &ln->channels[i];
+		chan->nodes[0]->adj_drag_target = 0;
+		chan->nodes[1]->adj_drag_target = 0;
+        }
+
 	for (u32 i = 0; i < ln->channel_count; i++) {
 		chan = &ln->channels[i];
 
-		if (chan->filtered)
+		if (!chan->visible)
 			continue;
 
+		if (chan->nodes[0]->visible && chan->nodes[0] == ln->drag_target)
+			chan->nodes[1]->adj_drag_target |= 1;
+		else
+			chan->nodes[0]->adj_drag_target ^= 0;
+
+		if (chan->nodes[1]->visible && chan->nodes[1] == ln->drag_target)
+			chan->nodes[0]->adj_drag_target = 1;
+		else
+			chan->nodes[1]->adj_drag_target ^= 0;
+
 		if (nodeid_eq(chan->nodes[0]->id, hit->id) ||
-		    nodeid_eq(chan->nodes[1]->id, hit->id))
+		    nodeid_eq(chan->nodes[1]->id, hit->id)) {
+			if (!chan->nodes[0]->visible || !chan->nodes[1]->visible)
+				continue;
 			print_channel_info(chan);
+		}
 	}
 }
 

@@ -23,7 +23,7 @@ struct node {
 	char alias[MAX_ALIAS_SIZE+1];
 	char id[PUBKEY_SIZE+1];
 
-	int filtered, mark_filtered;
+	int visible, mark_filtered, adj_drag_target;
 
 	union color color;
 
@@ -98,7 +98,7 @@ struct channel {
 	u64 satoshis;
 
 	// app specific stuff
-	int filtered;
+	int visible;
 	int draw_last;
 };
 

@@ -124,21 +124,24 @@ void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 		node = &ln->nodes[i];
 
 		if (filter_node == node || (nodeid && streq(nodeid, node->id)))
-			node->filtered = 1;
+			node->visible = 1;
 		else
-			node->filtered = 0;
+			node->visible = 0;
 	}
 
 	for (i = 0; i < ln->channel_count; i++) {
 		chan = &ln->channels[i];
 
-		if (i % 2 == 0)
-			chan->filtered = 1;
+		// this should filter out duplicates?
+		if ((chan->flags & 1) == 0)
+			chan->visible = 0;
+		else
+			chan->visible = 1;
 
-		if (chan->nodes[0]->filtered)
+		if (chan->nodes[0]->visible)
 			chan->nodes[1]->mark_filtered = 1;
 
-		if (chan->nodes[1]->filtered)
+		if (chan->nodes[1]->visible)
 			chan->nodes[0]->mark_filtered = 1;
 	}
 
@@ -146,7 +149,7 @@ void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 		node = &ln->nodes[i];
 
 		if (node->mark_filtered) {
-			node->filtered = 1;
+			node->visible = 1;
 			node->mark_filtered = 0;
 		}
 	}

@@ -29,16 +29,15 @@ void saturate(union color *c, double change)
 	c->b = P+((c->b)-P)*change;
 }
 
-
 void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 {
-	if (channel->filtered == 1)
+	if (!channel->visible)
 		return;
 
 	const struct node *n1 = channel->nodes[0];
 	const struct node *n2 = channel->nodes[1];
 
-	if (!(n1->filtered && n2->filtered))
+	if (!n1->visible || !n2->visible)
 		return;
 
 	const float stroke = max(1.0, channel->satoshis * 0.000001f);
@@ -170,7 +169,7 @@ void draw_grid(NVGcontext *vg, struct ln *ln) {
 
 void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 {
-	if (!node->filtered)
+	if (!node->visible)
 		return;
 
 	nvgFontSize(vg, 18.0f);
@@ -216,16 +215,39 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	const int dark_theme = ln->display_flags & DISP_DARK;
 
 	//TODO: use brightness instead of clear color for white theme
+	nvgBeginPath(vg);
+	nvgCircle(vg, 0, 0, r);
+	/* nvgPathWinding(vg, NVG_HOLE); */
+
+
+	if (node->adj_drag_target || node == ln->last_drag_target) {
+		node_color.a = 1.0;
+		node_color_inv.a = 1.0;
+		blend.a = 1.0;
+		clear_adj.a = 1.0;
+	}
+	else {
+		if (ln->drag_target) {
+			saturate((union color*)&node_color, 0.01);
+			node_color.a = 0.1;
+			node_color_inv.a = 0.1;
+			blend.a = 0.1;
+			clear_adj.a = 0.1;
+		}
+		else {
+			node_color.a = 0.9;
+			node_color_inv.a = 0.9;
+			blend.a = 0.9;
+			clear_adj.a = 0.9;
+		}
+	}
+
 	if (!dark_theme)
 		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0,
 				       ln->clear_color.nvg_color,
 				       node_color);
 	else
 		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, node_color, blend);
-
-	nvgBeginPath(vg);
-	nvgCircle(vg, 0, 0, r);
-	/* nvgPathWinding(vg, NVG_HOLE); */
 
 	if (ln->display_flags & DISP_STROKE_NODES) {
 		nvgStrokeWidth(vg, 3.0f);
@@ -236,11 +258,13 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	nvgFillPaint(vg, bg);
 	nvgFill(vg);
 
-	if (ln->display_flags & DISP_ALIASES) {
+	int is_adj = !ln->drag_target || ((ln->drag_target && node->adj_drag_target) || node == ln->drag_target);
+
+	if (is_adj && ln->display_flags & DISP_ALIASES) {
 
 		nvgBeginPath(vg);
 		nvgRoundedRect(vg, -bounds[2] / 2.0 - pad, bounds[3] - pad, bounds[2] + pad * 2.0, bounds[3] + pad * 2.0, 5.0);
-		nvgFillColor(vg, nvgRGBAf(node_color.r, node_color.g, node_color.b, 0.9));
+		nvgFillColor(vg, nvgRGBAf(node_color.r, node_color.g, node_color.b, node_color.a));
 		nvgFill(vg);
 
 		/* nvgTextMetrics(vg, NULL, NULL, &lineh); */
