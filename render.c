@@ -282,7 +282,8 @@ void render_ln(struct ln *ln)
 
 	struct channel *draw_last = NULL, *c = NULL;
 
-	draw_grid(vg, ln);
+	if (ln->display_flags & DISP_GRID)
+		draw_grid(vg, ln);
 
 	// render channels first
 	for (i = 0; i < ln->channel_count; i++) {
