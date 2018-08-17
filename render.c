@@ -61,11 +61,10 @@ void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 	else
 		c = n2t.nvg_color;
 
-	if ((channel->nodes[0] == ln->last_drag_target ||
-	     channel->nodes[1] == ln->last_drag_target))
+	if (channel->active && (channel->nodes[0] == ln->last_drag_target || channel->nodes[1] == ln->last_drag_target))
 		c.a = 1.0;
 	else {
-		if (ln->drag_target) {
+		if (!channel->active || ln->drag_target) {
 			saturate((union color*)&c, 0.01);
 			c.a = 0.1;
 		}
