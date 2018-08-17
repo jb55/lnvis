@@ -90,6 +90,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_A:
 			ln.display_flags ^= DISP_ALIASES;
 			break;
+		case GLFW_KEY_F:
+			ln.display_flags ^= DISP_FPS;
+			break;
 		case GLFW_KEY_S:
 			ln.display_flags ^= DISP_STROKE_NODES;
 			break;
@@ -322,7 +325,9 @@ int main()
 		/* renderDemo(vg, mx, my, winWidth, winHeight, t, 1, &data); */
 		update(&ln, dt);
 		render_ln(&ln);
-		renderGraph(vg, 5, 5, &fps);
+
+		if (ln.display_flags & DISP_FPS)
+			renderGraph(vg, 5, 5, &fps);
 
 		nvgEndFrame(vg);
 

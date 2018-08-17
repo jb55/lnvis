@@ -21,6 +21,7 @@ channel/node output is supported
 ```
 b             view multiple channels between nodes
 t             toggle dark/light theme
+f             toggle fps
 a             toggle aliases
 g             toggle grid
 s             toggle stroked nodes (small perf boost)

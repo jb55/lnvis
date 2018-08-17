@@ -108,6 +108,7 @@ enum display_flags {
 	DISP_ALIASES      = 1UL << 2,
 	DISP_STROKE_NODES = 1UL << 3,
 	DISP_BEZIER       = 1UL << 4,
+	DISP_FPS          = 1UL << 5,
 };
 
 struct ln {
