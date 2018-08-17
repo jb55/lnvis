@@ -2,10 +2,10 @@
 #ifndef LNVIS_GL_H
 #define LNVIS_GL_H
 
-
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
-
-#ifndef NO_GL_HEADERS
 
 void glUniform2fv(GLint location, GLsizei count, const GLfloat *value);
 
