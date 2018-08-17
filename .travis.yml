@@ -14,7 +14,7 @@ env:
     - DISPLAY=:99.0
 
 before_install:
-  - /.travis-setup.sh
+  - ./.travis-setup.sh
 
 addons:
   apt:
