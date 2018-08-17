@@ -2,6 +2,9 @@ language: c
 sudo: required
 dist: trusty
 script: make lnvis
+os:
+  - linux
+  - osx
 
 env:
   global:
@@ -11,14 +14,7 @@ env:
     - DISPLAY=:99.0
 
 before_install:
-    # Install GLFW $GLFW_VERSION
-  - wget -O glfw.zip https://github.com/glfw/glfw/releases/download/$GLFW_VERSION/glfw-$GLFW_VERSION.zip
-  - unzip glfw.zip
-  - cd glfw-$GLFW_VERSION
-  - cmake -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=$HOME
-  - make
-  - sudo make install
-  - cd ..
+  - /.travis-setup.sh
 
 addons:
   apt:

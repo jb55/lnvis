@@ -22,10 +22,11 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(BIN)
 
-include $(OBJS:.o=.d)
-
 %.d: %.c
 	$(CC) -MM $(CFLAGS) $< > $@
+
+include $(OBJS:.o=.d)
+
 
 $(BIN): $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS)  -o $@
