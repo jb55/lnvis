@@ -110,23 +110,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-static void print_channel(struct channel *chan)
-{
-	printf("chan shortid=%u:%u:%hu public=%d sats=%"PRIu64" active=%d "
-	       "last_update=%u base_fee_msat=%u fee_per_millionth=%u "
-	       "delay=%u\n",
-	       chan->short_channel_id.blocknum,
-	       chan->short_channel_id.txnum,
-	       chan->short_channel_id.outnum,
-	       chan->public,
-	       chan->satoshis,
-	       chan->active,
-	       chan->last_update_timestamp,
-	       chan->base_fee_msat,
-	       chan->fee_per_millionth,
-	       chan->delay);
-}
-
 static struct node *find_node(const char *pubkey, struct node *nodes, int node_count)
 {
 	// TODO: hash table
@@ -163,7 +146,6 @@ void test_read_json(struct ln *ln)
 
 	int channel_count = 0;
 	int node_count = 0;
-	int i;
 	struct channel *channels;
 	struct node *nodes;
 

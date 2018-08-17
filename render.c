@@ -43,12 +43,6 @@ void draw_channel(NVGcontext *vg, struct ln *ln, struct channel *channel)
 	const float stroke = max(1.0, channel->satoshis * 0.000001f);
 	/* const float stroke = (logf(channel->satoshis) / logf(10)) * 0.0f; */
 
-	const float sx = n1->x;
-	const float sy = n1->y;
-
-	const float ex = n2->x;
-	const float ey = n2->y;
-
 	union color n1t, n2t;
 
 	n1t.nvg_color = n1->color.nvg_color;
@@ -179,7 +173,7 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 	float bounds[4];
 	static const float pad = 2.0f;
 
-	nvgTextBounds(vg, 0, 0, node->alias, NULL, &bounds);
+	nvgTextBounds(vg, 0, 0, node->alias, NULL, &bounds[0]);
 
 	NVGpaint bg;
 
@@ -279,7 +273,7 @@ void render_ln(struct ln *ln)
 	u32 i;
 	NVGcontext *vg = ln->vg;
 
-	struct channel *draw_last = NULL, *c = NULL;
+	struct channel *c = NULL;
 
 	if (ln->display_flags & DISP_GRID)
 		draw_grid(vg, ln);
