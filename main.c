@@ -183,7 +183,7 @@ int main()
 	PerfGraph fps;
 	double prevt = 0;
 
-	srand(time(0));
+	srand(0);
 	// ln collision grid subdivision
 	// cells = grid_div * grid_div
 	static const int grid_div = 20;
