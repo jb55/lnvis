@@ -9,8 +9,8 @@ os:
 env:
   global:
     - GLFW_VERSION=3.2.1
-    - TRAVIS_CFLAGS="-I/home/travis/include"
-    - TRAVIS_LDFLAGS="-L/home/travis/lib"
+    - EXTRA_CFLAGS="-I/home/travis/include"
+    - EXTRA_LDFLAGS="-L/home/travis/lib"
     - DISPLAY=:99.0
 
 before_install:

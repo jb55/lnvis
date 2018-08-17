@@ -1,10 +1,15 @@
 
 BIN = lnvis
 PREFIX ?= /usr/local
-CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 -DJSMN_PARENT_LINKS $(TRAVIS_CFLAGS)
+CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 -DJSMN_PARENT_LINKS $(EXTRA_CFLAGS)
 
-LDFLAGS = $(TRAVIS_LDFLAGS) -lglfw -lGL -lm
+LDFLAGS = $(EXTRA_LDFLAGS) -lglfw -lm
 
+ifeq "$(OSTYPE)" "darwin"
+        LDFLAGS += -framework OpenGL
+else
+	LDFLAGS += -lGL
+endif
 
 SRCS = main.c
 
