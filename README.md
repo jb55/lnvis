@@ -1,6 +1,8 @@
 
 # LNvis
 
+[![Build Status](https://travis-ci.org/jb55/lnvis.svg)](https://travis-ci.org/jb55/lnvis)
+
 A Lightning Network Visualizer
 
 

@@ -1,0 +1,33 @@
+language: c
+sudo: required
+dist: trusty
+script: make
+
+env:
+  global:
+    - GLFW_VERSION=3.2.1
+    - DISPLAY=:99.0
+
+before_install:
+    # Install GLFW $GLFW_VERSION
+  - wget -O glfw.zip https://github.com/glfw/glfw/releases/download/$GLFW_VERSION/glfw-$GLFW_VERSION.zip
+  - unzip glfw.zip
+  - cd glfw-$GLFW_VERSION
+  - cmake -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=$HOME
+  - make
+  - sudo make install
+
+addons:
+  apt:
+    packages:
+      - &common_packages [ 'wget', 'unzip' ]
+      - &build_packages [ 'cmake' ]
+      - &mesa_packages [ 'libgl1-mesa-dev' ]
+      - &x11_packages [
+          'xorg-dev', 'libx11-dev', 'libxcursor-dev',
+          'libxext-dev', 'libxi-dev', 'libxinerama-dev', 'libxrandr-dev',
+          'libxss-dev', 'libxt-dev', 'libxv-dev', 'libxxf86vm-dev']
+
+compiler:
+- clang
+- gcc
