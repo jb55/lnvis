@@ -1,9 +1,11 @@
 
 BIN = lnvis
 PREFIX ?= /usr/local
-CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 -DJSMN_PARENT_LINKS $(EXTRA_CFLAGS)
+CFLAGS = -Ideps -ggdb -O2 -Wall -Wextra -std=c99 -DJSMN_PARENT_LINKS \
+				 $(shell pkg-config --cflags glfw3) \
+				 $(EXTRA_CFLAGS)
 
-LDFLAGS = $(EXTRA_LDFLAGS) -lglfw -lm
+LDFLAGS = $(EXTRA_LDFLAGS) $(shell pkg-config --libs glfw3) -lm
 
 ifeq ($(OS),Windows_NT)
     CCFLAGS += -D WIN32
