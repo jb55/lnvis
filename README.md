@@ -5,6 +5,7 @@
 
 A Lightning Network Visualizer
 
+<img style="width: 25%; height: 25%;" src="https://jb55.com/s/abe49a248360d41c.png"/>
 
 ## Usage
 
