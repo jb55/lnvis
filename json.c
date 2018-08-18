@@ -335,7 +335,7 @@ int parse_clightning_channels(FILE *fd, int *nchans, struct channel **pchannels)
 		tokstr = &buffer[tok->start];
 
 		// allocate more channels if needed
-		if (*nchans > chancap) {
+		if (*nchans >= chancap) {
 			chancap *= 2;
 			res = realloc(channels, chancap * sizeof(struct channel));
 			if (res == NULL) {
