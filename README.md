@@ -31,6 +31,19 @@ left click    move + focus node
 right click   filter node
 ```
 
+## How it works
+
+LNvis renders the Lightning Network channel gossip, which include nodes and the
+edges (channels) between those nodes.
+
+* Channels are colored by the node that opened the channel
+
+* Channel widths are rendered proportional to the capacity
+
+* Right clicking a node filters the view to that node and its neighbors
+
+* Dragging a node in any view will focus that node and its neihbors
+
 ## Building
 
 Install dependencies (`glfw3`, `pkg-config`)
