@@ -152,11 +152,15 @@ static void physics(struct ln *ln, double dt)
 
 static void print_channel_info(struct channel *chan)
 {
-	printf("%u:%u:%hu %s -> %s (%f bits)\n",
+	printf("%u:%u:%hu %.*s %s -> %.*s %s (%f bits)\n",
 	       chan->short_channel_id.blocknum,
 	       chan->short_channel_id.txnum,
 	       chan->short_channel_id.outnum,
+	       8,
+	       chan->nodes[0]->id,
 	       chan->nodes[0]->alias,
+	       8,
+	       chan->nodes[1]->id,
 	       chan->nodes[1]->alias,
 	       chan->satoshis / 100.0
 		);
