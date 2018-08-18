@@ -31,9 +31,9 @@ right click   filter node
 
 ## Building
 
-Install dependencies (`glfw3`)
+Install dependencies (`glfw3`, `pkg-config`)
 
-    $ sudo apt-get install libglfw3-dev
+    $ sudo apt-get install libglfw3-dev pkg-config
 
 Build
 
