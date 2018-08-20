@@ -48,7 +48,11 @@ edges (channels) between those nodes.
 
 Install dependencies (`glfw3`, `pkg-config`)
 
+    # Debian / Ubuntu
     $ sudo apt-get install libglfw3-dev pkg-config
+    
+    # MacOS
+    brew install glfw3
 
 Build
 
