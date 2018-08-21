@@ -50,6 +50,7 @@ SRCS += render.c
 SRCS += perf.c
 SRCS += json.c
 SRCS += demo.c
+SRCS += options.c
 SRCS += $(wildcard deps/*.c)
 SRCS += $(wildcard deps/*/*.c)
 

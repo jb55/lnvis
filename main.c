@@ -19,6 +19,7 @@
 #include "update.h"
 #include "ln.h"
 #include "json.h"
+#include "options.h"
 
 void errorcb(int error, const char *desc)
 {
@@ -142,10 +143,10 @@ static void connect_node_channels(struct node *nodes, int node_count,
 	}
 }
 
-void test_read_json(struct ln *ln)
+void read_json(struct ln *ln, struct options *options)
 {
-	FILE *channels_fd = fopen("clightning-channels.json", "r");
-	FILE *nodes_fd = fopen("clightning-nodes.json", "r");
+	FILE *channels_fd = fopen(options->channels, "r");
+	FILE *nodes_fd = fopen(options->nodes, "r");
 
 	int channel_count = 0;
 	int node_count = 0;
@@ -185,7 +186,7 @@ int main(int argc, const char *argv[])
 	NVGcontext *vg = NULL;
 	PerfGraph fps;
 	double prevt = 0;
-	const char *filter;
+	struct options options;
 
 	srand(0);
 	// ln collision grid subdivision
@@ -199,12 +200,9 @@ int main(int argc, const char *argv[])
 		  | DISP_STROKE_NODES
 		  ;
 
-	if (argc == 2)
-		filter = argv[1];
-	else
-		filter = "03f3c108ccd536b8526841f0a5c58212bb9e6584a1eb493080e7c1cc34f82dad71";
+	parse_options(argc, argv, &options);
 
-	test_read_json(&ln);
+	read_json(&ln, &options);
 
 	ln.display_flags = flags;
 
@@ -305,7 +303,7 @@ int main(int argc, const char *argv[])
 		if (first) {
 			/* random_network(winWidth, winHeight, 3, 500, &ln); */
 			init_network(winWidth, winHeight, &ln);
-			filter_network(filter, NULL, &ln);
+			filter_network(options.filter, NULL, &ln);
 			first = 0;
 		}
 

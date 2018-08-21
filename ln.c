@@ -116,6 +116,7 @@ static void print_node(struct node *node)
 void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 {
 	u32 i;
+	int first = 1;
 	struct node *node = NULL;
 	struct channel *chan = NULL;
 	ln->filter = (char*)nodeid;
@@ -123,7 +124,10 @@ void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 	for (i = 0; i < ln->node_count; i++) {
 		node = &ln->nodes[i];
 
-		if (filter_node == node || (nodeid && streq(nodeid, node->id))) {
+		if ((filter_node == NULL && first) ||
+		    filter_node == node ||
+		    (nodeid && streq(nodeid, node->id))) {
+			first = 0;
 			node->visible = 1;
 			ln->filter_target = node;
 		}
