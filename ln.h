@@ -130,6 +130,7 @@ struct ln {
 
 	struct node *drag_target;
 	struct node *last_drag_target;
+	struct node *filter_target;
 
 	struct node *nodes;
 	u32 node_count;

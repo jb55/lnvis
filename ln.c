@@ -123,8 +123,10 @@ void filter_network(const char *nodeid, struct node *filter_node, struct ln *ln)
 	for (i = 0; i < ln->node_count; i++) {
 		node = &ln->nodes[i];
 
-		if (filter_node == node || (nodeid && streq(nodeid, node->id)))
+		if (filter_node == node || (nodeid && streq(nodeid, node->id))) {
 			node->visible = 1;
+			ln->filter_target = node;
+		}
 		else
 			node->visible = 0;
 	}

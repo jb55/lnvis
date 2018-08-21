@@ -243,8 +243,14 @@ void draw_node(NVGcontext *vg, struct ln *ln, struct node *node)
 		bg = nvgRadialGradient(vg, -light, -light, 0, r+2.0, node_color, blend);
 
 	if (ln->display_flags & DISP_STROKE_NODES) {
-		nvgStrokeWidth(vg, 3.0f);
-		nvgStrokeColor(vg, dark_theme ? clear_adj : ln->clear_color.nvg_color);
+		if (ln->filter_target == node) {
+			nvgStrokeColor(vg, node_color_inv);
+			nvgStrokeWidth(vg, 5.0f);
+		}
+		else {
+			nvgStrokeColor(vg, dark_theme ? clear_adj : ln->clear_color.nvg_color);
+			nvgStrokeWidth(vg, 3.0f);
+		}
 		nvgStroke(vg);
 	}
 

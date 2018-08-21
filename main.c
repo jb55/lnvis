@@ -177,7 +177,7 @@ void test_read_json(struct ln *ln)
 	ln->node_count = node_count;
 }
 
-int main()
+int main(int argc, const char *argv[])
 {
 	GLFWwindow *window;
 	int first = 1;
@@ -185,6 +185,7 @@ int main()
 	NVGcontext *vg = NULL;
 	PerfGraph fps;
 	double prevt = 0;
+	const char *filter;
 
 	srand(0);
 	// ln collision grid subdivision
@@ -198,7 +199,11 @@ int main()
 		  | DISP_STROKE_NODES
 		  ;
 
-	const char *filter = "03f3c108ccd536b8526841f0a5c58212bb9e6584a1eb493080e7c1cc34f82dad71";
+	if (argc == 2)
+		filter = argv[1];
+	else
+		filter = "03f3c108ccd536b8526841f0a5c58212bb9e6584a1eb493080e7c1cc34f82dad71";
+
 	test_read_json(&ln);
 
 	ln.display_flags = flags;
