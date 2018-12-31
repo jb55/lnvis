@@ -16,7 +16,8 @@ channel/node output is supported
     lightning-cli listnodes > clightning-nodes.json && \
     lightning-cli listchannels > clightning-channels.json && \
     ./lnvis --channels clightning-channels.json \
-            --nodes clightning-nodes.json
+            --nodes clightning-nodes.json \
+            --filter <starting-node-id>
 
 ## Controls
 
