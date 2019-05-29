@@ -39,7 +39,7 @@ static const struct channel_parser channel_parsers[] = {
 	{ "short_channel_id",      PARSING_CHAN_SHORTID },
 	{ "public",                PARSING_CHAN_PUBLIC },
 	{ "satoshis",              PARSING_CHAN_SATOSHIS },
-	{ "flags",                 PARSING_CHAN_FLAGS },
+	{ "channel_flags",         PARSING_CHAN_FLAGS },
 	{ "active",                PARSING_CHAN_ACTIVE },
 	{ "last_update",           PARSING_CHAN_LAST_UPDATE },
 	{ "base_fee_millisatoshi", PARSING_CHAN_BASE_FEE },
@@ -87,7 +87,7 @@ static int parse_short_channel_id(int toklen, const char *tokstr,
 	char buf[toklen + 1];
 	buf[toklen] = '\0';
 	memcpy(buf, tokstr, toklen);
-	return sscanf(buf, "%u:%u:%hu",
+	return sscanf(buf, "%ux%ux%hu",
 		      &chanid->blocknum,
 		      &chanid->txnum,
 		      &chanid->outnum);
