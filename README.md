@@ -3,7 +3,7 @@
 
 A Lightning Network Visualizer
 
-<img src="https://jb55.com/s/a50cb0ae69cd2032.png"/>
+<img src="https://jb55.com/s/a50cb0ae69cd2032.png?what=1"/>
 
 ## Usage
 
